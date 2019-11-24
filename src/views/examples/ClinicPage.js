@@ -215,11 +215,13 @@ class ClinicPage extends Component {
 
             axios({
             method: 'post',
-            url: 'http://localhost:8088/clinic',
-            data: JSON.stringify(data)
+            url: 'http://localhost:8099/clinic',
+            data: data ,
+            ContentType: 'application/json'
             }).then((response) => {
                 console.log(response);
-                alert(response.data)
+                alert("Klinika je uspjesno dodata")
+                this.setState({name:"", city:"", address:"", rooms:[]})
             }, (error) => {
             console.log(error);
             });
@@ -275,17 +277,17 @@ class ClinicPage extends Component {
                 <Form onSubmit={this.addClinic}>
                   <FormGroup>
                   <label>Naziv:</label>
-                  <Input name="name" type="text" onChange={(event) => this.clinicNameValidation(event)} />
+                  <Input name="name" type="text" value={this.state.name} onChange={(event) => this.clinicNameValidation(event)} />
                   <p style={{color:'red'}}>{this.state.clinicNameVal}</p>
                   </FormGroup>
                   <FormGroup>
                   <label>Grad:</label>
-                  <Input name="city" type="text" onChange={(event) => this.cityValidation(event)} />
+                  <Input name="city" type="text" value={this.state.city} onChange={(event) => this.cityValidation(event)} />
                   <p style={{color:'red'}}>{this.state.cityVal}</p>
                   </FormGroup>
                   <FormGroup>
                   <label>Adresa</label>
-                  <Input name="address" type="text" onChange={(event) => this.addressValidation(event)} />
+                  <Input name="address" type="text" value={this.state.address} onChange={(event) => this.addressValidation(event)} />
                   <p style={{color:'red'}}>{this.state.addressVal}</p>
                   </FormGroup>
                   <FormGroup>
@@ -329,4 +331,3 @@ class ClinicPage extends Component {
 }
 
 export default ClinicPage;
-

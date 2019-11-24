@@ -21,7 +21,7 @@ import ReactDOM from "react-dom";
 import { BrowserRouter, Route, Redirect, Switch } from "react-router-dom";
 
 // styles
-import "assets/css/bootstrap.min.css";
+import "assets/css/bootstrap.css";
 import "assets/scss/paper-kit.scss";
 import "assets/demo/demo.css";
 // pages
@@ -32,6 +32,8 @@ import ProfilePage from "views/examples/ProfilePage.js";
 import RegisterPage from "views/examples/RegisterPage.js";
 import ClinicPage from "views/examples/ClinicPage.js";
 import MedicalWorkerPage from "views/examples/MedicalWorkerPage.js";
+import RegistrationRequest from "views/examples/RegistrationRequest.js";
+import AdministratorPage from "views/examples/AdministratorPage.js";
 // others
 
 ReactDOM.render(
@@ -61,6 +63,14 @@ ReactDOM.render(
       <Route
         path="/medicalworker-page"
         render={props => <MedicalWorkerPage {...props} />}
+      />
+      <Route
+        path="/registration-request"
+        render={props => <RegistrationRequest {...props} />}
+      />
+      <Route
+        path="/administrator-page"
+        render={props => <AdministratorPage {...props} />}
       />
       <Redirect to="/register-page" />
     </Switch>

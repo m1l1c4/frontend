@@ -19,6 +19,7 @@
 import React , {Component} from "react";
 import axios from 'axios';
 
+
 // reactstrap components
 import {
   Button,
@@ -44,6 +45,7 @@ import {
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js';
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
 import DemoFooter from 'components/Footers/DemoFooter.js';
+import { isFlowBaseAnnotation } from "@babel/types";
 
 class MedicalWorkerPage extends Component {
   constructor(props)
@@ -52,16 +54,16 @@ class MedicalWorkerPage extends Component {
 
     this.state = {
       dataShow: false,
-      name: "Dragana" ,
-      surname: "Mihajlovic" ,
-      email: "draganamihajlovic55@yahoo.com" ,
-      phone: "53745745733" ,
-      clinic: "Foca" ,
+      name: "" ,
+      surname: "" ,
+      email: "" ,
+      phone: "" ,
+      clinic: "" ,
       raiting: "10" ,
       workingTime: "8-15h" ,
       temp:true,
       temp1:false,
-      password:"dfhsdfhdh54",
+      password:"",
       name1:"",
       surname1:"",
       phone1:"",
@@ -72,11 +74,18 @@ class MedicalWorkerPage extends Component {
       surnameValidation:"",
       phoneValidation:"",
       password1Validation:"",
-      password11Validation:""
+      password11Validation:"",
+      flag1: true,
+      flag2: true,
+      flag3: true,
+      flag4: true,
+      flag5: true,
+      changePass: false,
+      message1:""
+      
     };
 
-    this.updateOneWorker = this.updateOneWorker.bind(this);
-   
+    this.updateOneWorker = this.updateOneWorker.bind(this);   
   }
       
   doc = document.documentElement.classList.remove("nav-open");
@@ -88,87 +97,93 @@ class MedicalWorkerPage extends Component {
    // };
  // });
 
- 
+
+ componentDidMount(){
+  axios({
+    method: 'get',
+    url: 'http://localhost:8099/getMedicalWorker',
+  }).then((response)=>{
+    console.log(response);
+    this.setState({name:response.data.user.name, email:response.data.user.email,surname:response.data.user.surname,phone:response.data.phone,password:response.data.user.password})
+  },(error)=>{
+    console.log(error);
+  });
+ }
+   
+
  updateOneWorker = event => {
-  event.preventDefault();
-  this.state.temp1 = false;
-  this.state.name = this.state.name1
-  this.state.surname = this.state.surname1
-  this.state.password = this.state.password11
-  this.state.phone = this.state.phone1
-  let isOk = true;
+    event.preventDefault();
+    let isOk = true;
 
-  if(this.state.name1===''){
-    this.setState({nameValidation : "Ovo polje ne moze biti prazno"});
-    isOk = false;
-  }
-  else if(!this.state.name1[0].match('[A-Z]')){
-    this.setState({nameValidation : "Ime mora da pocinje velikim slovom"});
-    isOk = false;
-  }
-  else{
-    this.setState({nameValidation : ""});
-  }
+      let nameMy = this.state.name1
+      let surnameMy = this.state.surname1;
+      let phoneMy = this.state.phone1
 
-  if(this.state.surname1===''){
-    this.setState({surnameValidation : "Ovo polje ne moze biti prazno"});
-    isOk = false;
-  }
-  else if(!this.state.surname1[0].match('[A-Z]')){
-    this.setState({surnameValidation : "Prezime mora da pocinje velikim slovom"});
-    isOk = false;
-  }
-  else{
-    this.setState({surnameValidation : ""});
-  }
+      if (nameMy === undefined || nameMy === ''){
+        this.setState({nameValidation:"Ime je obavezno polje."})
+        isOk = false;
+      }
+      else if(!nameMy[0].match('[A-Z]')){
+        this.setState({nameValidation:"Ime mora pocinjati velikim slovom."})
+        isOk = false;
+     }
+      else{
+        this.setState({nameValidation:""})
+      }
 
-  if(this.state.nameValidation==='Ovo polje ne moze biti prazno' || this.state.surnameValidation==='Ovo polje ne moze biti prazno' || this.state.phoneValidation==='Ovo polje ne moze biti prazno' || this.state.password1 === 'Ovo polje ne moze biti prazno' || this.state.password11==='Ovo polje ne moze biti prazno'){
-      isOk = false;
-      this.state.message = 'Polja ne smiju biti prazna !'
-  }
-  else if(this.state.name==='' || this.state.name1 === '' || this.state.surname1 === '' || this.state.phone === '' || this.state.password1 === '' || this.state.password11 == ''){
-    isOk = false;
-    this.state.message = 'Polja ne smiju biti prazna !'
+      if (surnameMy === undefined || surnameMy === ''){
+        this.setState({surnameValidation:"Prezime je obavezno polje."})
+        isOk = false;
+      }
+      else if(!surnameMy[0].match('[A-Z]')){
+        this.setState({surnameValidation:"Prezime mora pocinjati velikim slovom."})
+        isOk = false;
+     }
+      else{
+        this.setState({surnameValidation:""})
+      }
 
-  }
-  else if( this.state.nameValidation==='Ime mora da pocinje velikim slovom' || this.state.surnameValidation === 'Prezime mora da pocinje velikim slovom'){
-    isOk = false;
-    this.state.message = 'Ime i prezime moraju da pocnu velikim slovom!'
-  }
-  else if(this.state.password1 === 'Ovo polje ne moze biti prazno' || this.state.password11==='Ovo polje ne moze biti prazno' || this.state.pasword11 ==='Lozinke se moraju podudarati'){
-    isOk = false;
-    this.state.message = 'Neispravne lozinke!';
-  }
-  else{
-    this.state.message = '';
-  }
-
-
-  let data = {
-    "user":{
-      "name": this.state.name ,
-      "surname": this.state.surname ,
-      "email": this.state.email ,
-      "password": this.state.password
-    },
-     "phone": this.state.phone ,
-    
-  };
+      if (phoneMy === undefined || phoneMy === ''){
+        this.setState({phoneValidation:"Telefon je obavezno polje."})
+        isOk = false;
+      }
+      else{
+        this.setState({phoneValidation:""})
+      }
+      
 
   if(isOk){
+
+    this.state.name = this.state.name1
+    this.state.surname = this.state.surname1
+    this.state.phone = this.state.phone1
+        let data = {
+        "user":{
+          "name": this.state.name ,
+          "surname": this.state.surname ,
+          "email": this.state.email ,
+          "password": this.state.password
+        },
+        "phone": this.state.phone ,
+      };
+
+
     axios({
       method: 'post',
-      url: 'http://localhost:8088/updateMedicalWorker/1',
-      data: JSON.stringify(data)
+      url: 'http://localhost:8099/updateMedicalWorker',
+      data: data
     }).then((response) => {
       console.log(response);
       alert('Uspjesna izmjena podataka!')
+      this.setState({temp1: false});
     }, (error) => {
       console.log(error);
     });
-    this.setState({dataShow: false});
+    this.setState({temp1: false});
 
+    //this.setState({temp1: false});
   }
+  
 };
 
 validacija(e) {
@@ -176,12 +191,15 @@ validacija(e) {
   let sun = e.target.value;
   if(sun===''){
     this.setState({nameValidation : "Ovo polje ne moze biti prazno"});
+    this.state.flag1 = false
   }
   else if(!sun[0].match('[A-Z]')){
     this.setState({nameValidation : "Ime mora da pocinje velikim slovom"});
+    this.state.flag1 = false
   }
   else{
     this.setState({nameValidation : ""});
+    this.state.flag1 = true
   }
   
   e.preventDefault();
@@ -193,14 +211,17 @@ validacija1(e) {
   let sun = e.target.value;
   if(sun===''){
     this.setState({surnameValidation : "Ovo polje ne moze biti prazno"});
+    this.state.flag2 = false
   }
   else if(!sun[0].match('[A-Z]')){
     this.setState({surnameValidation : "Prezime mora da pocinje velikim slovom"});
+    this.state.flag2 = false
   }
   else{
     this.setState({surnameValidation : ""});
+    this.state.flag2 = true
   }
-  
+
   e.preventDefault();
 }
 
@@ -209,14 +230,16 @@ validacija2(e) {
   let sun = e.target.value;
   if(sun===''){
     this.setState({phoneValidation : "Ovo polje ne moze biti prazno"});
+    this.state.flag3 = false
   }
   else if(sun!=''){
     this.setState({phoneValidation : ""});
+    this.state.flag3 = false
   }
   else{
     this.setState({phoneValidation : ""});
+    this.state.flag3 = true
   }
-  
   e.preventDefault();
 }
 
@@ -226,14 +249,18 @@ validacija3(e) {
   let sun = e.target.value;
   if(sun===''){
     this.setState({password1Validation : "Ovo polje ne moze biti prazno"});
+    this.state.flag4 = false
   }
   else if(sun!=''){
     this.setState({password1Validation : ""});
+    this.state.flag4 = false
   }
   else{
+    alert(sun)
     this.setState({password1Validation : ""});
+    this.state.flag4 = true
   }
-  
+
   e.preventDefault();
 }
 
@@ -241,19 +268,48 @@ validacija3(e) {
 validacija4(e) {
   this.setState({password11 : e.target.value});
   let sun = e.target.value;
-  if(sun==='' || sun === undefined){
+  this.state.password11 = sun;
+  if(sun===''){
     this.setState({password11Validation : "Ovo polje ne moze biti prazno"});
+    this.state.flag5 = false
   }
-  else if(this.state.password1!=this.state.password11  && this.state.password11!='' && this.state.password1!=''){
-    this.setState({password11Validation : "Lozinke se moraju podudarati"});
+  else if(sun!=undefined && this.state.password1!=e.target.value){
+    this.setState({password11Validation: "Lozinke se moraju poklapati"})
+    this.state.flag5 = false
+  }
+  else if(sun === this.state.password1) {
+    this.state.flag5 = true;
+    this.setState({password11Validation: ""})
   }
   else{
     this.setState({password11Validation : ""});
+    this.state.flag5 = true;
   }
-  
-  
+
   e.preventDefault();
 }
+
+changePassword = event => {
+  event.preventDefault();
+  this.state.changeData = true;
+  let pom1 = this.state.password1;
+  let pom2 = this.state.password11;
+  alert(pom1)
+  alert(pom2)
+  if(pom1!=pom2){
+      this.setState({message1 : "Lozinke se moraju poklapati!"});
+  }
+  else if(pom1 === undefined || pom1 === ""){
+    this.setState({message1 : "Lozinke se moraju poklapati!"});
+  }
+  else{
+    this.state.password = this.state.password1;
+    this.setState({changePass:false});
+    this.state.password1=""
+    this.state.password11=""
+  }
+}
+
 
 render() {
   return (
@@ -299,13 +355,12 @@ render() {
             className="close"
             data-dismiss="modal"
             type="button"
-            onClick={event => this.setState({temp1:true,name1:'',surname1:'', phone1:'',password1:''})}
-            onClick={() => this.setState({temp1: false})}
+            onClick={event => this.setState({temp1:false,name1:'',surname1:'', phone1:'',password1:''})} // na izlaz
           >
-          <span aria-hidden={true}>×</span>
+          <span aria-hidden={true}>�</span>
           </button>
           </div>
-          <div className="modal-body"> 
+          <div className="modal-body">     
           <Form onSubmit={this.updateOneWorker}>
                   <FormGroup>
                   <label>Ime</label>
@@ -322,24 +377,53 @@ render() {
                   <Input  name="phone1"  value = {this.state.phone1} onChange={(event) => this.validacija2(event)} type="number"  />
                   <p style={{color:'red'}} > {this.state.phoneValidation} </p>
                   </FormGroup>
-                  <FormGroup>
-                  <label>Lozinka</label>
-                  <Input  name="password1"  value = {this.state.password1} onChange={(event) => this.validacija3(event)} type="password"  />
-                  <p style={{color:'red'}} > {this.state.password1Validation} </p>
-                  </FormGroup>
-                  <FormGroup>
-                  <label>Potvrda lozinke</label>
-                  <Input  name="password11"  value = {this.state.password11} onChange={(event) => this.validacija4(event)} type="password"  />
-                  <label color="red" name="password11Validation" > </label>
-                  <p style={{color:'red'}} > {this.state.password11Validation} </p>
-                  </FormGroup>
-                  <Button block className="btn-round" color="info"   >
+                  <Button block className="btn-round" color="info"  onClick={event => this.setState({changePass: true})}  >
+
+                Promijeni lozinku
+                  </Button>
+
+                  <Button block className="btn-round" color="info"  >
                     Izmijeni podatke
                   </Button>
                   <p style={{color:'red'}} > {this.state.message} </p>
                   </Form>         
              </div>
     </Modal>
+
+
+
+    <Modal  modalClassName="modal-register" isOpen={this.state.changePass}>
+<div className="modal-header no-border-header text-center">
+          <button
+            aria-label="Close"
+            className="close"
+            data-dismiss="modal"
+            type="button"
+            onClick={event => this.setState({changePass:false, password1:"",password11:""})} // na izlaz 
+          >
+          <span aria-hidden={true}>�</span>
+          </button>
+          </div>
+          <div className="modal-body"> 
+          <Form onSubmit={this.changePassword} > 
+        <FormGroup>
+        <label>Nova lozinka</label>
+        <Input  name="password1"  value = {this.state.password1}  onChange={(event) => this.validacija3(event)} type="password"  />
+        <p style={{color:'red'}} > {this.state.password1Validation} </p>
+        </FormGroup>
+        <FormGroup>
+        <label>Potvrda lozinke</label>
+        <Input  name="password11"  value = {this.state.password11} onChange={(event) => this.validacija4(event)}  type="password"  />
+        <label color="red" name="password11Validation" > </label>
+        <p style={{color:'red'}} > {this.state.message1} </p>
+        </FormGroup>
+        <Button block className="btn-round" color="info"   >
+       Sacuvaj izmjene
+        </Button>
+        </Form>
+</div>
+</Modal>
+
 
     <Col className="ml-auto mr-auto" md="6"> 
           <Form>
@@ -383,3 +467,5 @@ render() {
     )};
 }
 export default MedicalWorkerPage;
+
+

@@ -50,7 +50,8 @@ class RegisterPage extends Component {
       emailErrorText: "" ,
       emailValid: true ,
       showResponse: false ,
-      loginDisable: true
+      loginDisable: true ,
+      message: ""
     };
 
     this.sendRegistration = this.sendRegistration.bind(this) ;
@@ -120,26 +121,32 @@ class RegisterPage extends Component {
             this.setState({formErrorText: "Sva polja su obavezna. Molim vas popunite prazna polja."})
         } else {
 
-          let data = {
+          let user = {
             "name": this.state.name ,
             "surname": this.state.surname ,
             "email": this.state.email ,
+            "password":this.state.password,
+            "enabled": true
+          };
+
+          let data = {
+            "user": user,
             "jbo": this.state.jbo ,
-            "phone": this.state.phone ,
-            "adress": this.state.adress ,
+            "phoneNumber": this.state.phone ,
+            "address": this.state.adress ,
             "city": this.state.city ,
             "state": this.state.statee,
-            "password":this.state.password
+            "email": this.state.email ,
           };
 
           axios({
             method: 'post',
-            url: 'http://localhost:8088/register',
+            url: 'http://localhost:8099/register',
             data: data ,
-            ContentType: 'application/json'
+            ContentType: 'application/json'            
           }).then((response) => {
             if (response.status == 200)
-              this.setState({showResponse: true}) ;
+              this.setState({message: "Vas zahtev za registraciju je uspesno poslat." , showResponse: true}) ;
           }, (error) => {
             console.log(error);
           });
@@ -160,20 +167,26 @@ class RegisterPage extends Component {
     } else {
 
       let data = {        
-        "email": this.state.email ,        
-        "password":this.state.password
+        "username": this.state.email ,        
+        "password":this.state.password         
       };
 
       axios({
         method: 'post',
-        url: 'http://localhost:8088/login',
+        url: 'http://localhost:8099/login',
         data: data ,
         ContentType: 'application/json'
       }).then((response) => {
         if (response.status == 200)
-          this.setState({showResponse: true}) ;
+        {
+          localStorage.setItem("ulogovan", response.accessToken) ;
+          this.setState({message: "Uspesno logovanje.", showResponse: true}) ;
+        }
+          
       }, (error) => {
-        console.log(error);
+        {
+          this.setState({message: "Neuspesno logovanje.", showResponse: true}) ;
+        }
       });
 
       this.cleanAll();
@@ -186,7 +199,7 @@ class RegisterPage extends Component {
     return (
     <div>
       <Alert color="info" isOpen={this.state.showResponse} toggle={this.onDismiss}>
-            <b>Vaš zahtev za registraciju je uspešno poslat.</b> 
+            <b>{this.state.message}</b> 
       </Alert>
       <ExamplesNavbar showRegister={() => this.setState({registerShow: true})} showLogin={() => this.setState({loginShow: true})}/>
       <div
@@ -276,7 +289,7 @@ class RegisterPage extends Component {
             <h3 className="title mx-auto">Dobrodošli!</h3>
         </div>
         <div className="modal-body">                       
-                <Form onSubmit={this.sendRegistration}>                  
+                <Form onSubmit={this.sendLogin}>                  
                   <FormGroup>
                     <label className="text-primary font-weight-bold"> Email</label>
                     <Input className="form-control" name="email" placeholder="email" type="text" value={this.state.email} onChange={event => this.setState({email: event.target.value})} onBlur={this.mailValidation}/>
