@@ -91,6 +91,10 @@ function ExamplesNavbar(props){
           isOpen={navbarCollapse}
         >
           <Nav navbar>
+          <Button onClick={props.showProfileEvent} 
+              color="neutral" className="btn-link">
+                  <i className="nc-icon nc-book-bookmark" />Profil
+            </Button> 
           <Button onClick={props.showLogin}
               color="neutral" className="btn-link">
                   <i className="nc-icon nc-book-bookmark" /> Prijavi se
@@ -99,7 +103,7 @@ function ExamplesNavbar(props){
               color="neutral" className="btn-link">
                   <i className="nc-icon nc-book-bookmark" /> Registruj se
             </Button>
-                
+               
               
             
             
