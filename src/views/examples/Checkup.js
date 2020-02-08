@@ -735,8 +735,7 @@ class Checkup extends Component {
                                         </div>
                                     </div>
                             </Form>
-                        </Col>
- 
+                        </Col> 
                     </Container>
                     <NotificationContainer/>
                 </div>
