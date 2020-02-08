@@ -34,6 +34,7 @@ import ClinicPage from "views/examples/ClinicPage.js";
 import MedicalWorkerPage from "views/examples/MedicalWorkerPage.js";
 import RegistrationRequest from "views/examples/RegistrationRequest.js";
 import AdministratorPage from "views/examples/AdministratorPage.js";
+import PatientPage from "views/examples/PatientPage.js";
 // others
 
 ReactDOM.render(
@@ -71,6 +72,10 @@ ReactDOM.render(
       <Route
         path="/administrator-page"
         render={props => <AdministratorPage {...props} />}
+      />
+      <Route
+        path="/patient-page"
+        render={props => <PatientPage {...props} />}
       />
       <Redirect to="/register-page" />
     </Switch>

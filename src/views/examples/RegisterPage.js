@@ -62,6 +62,7 @@ class RegisterPage extends Component {
     this.cleanAll = this.cleanAll.bind(this) ;
     this.mailValidation = this.mailValidation.bind(this) ;
     this.sendLogin = this.sendLogin.bind(this) ;
+    this.getUlogovani = this.getUlogovani.bind(this) ;
   }
       
   doc = document.documentElement.classList.remove("nav-open");
@@ -156,6 +157,31 @@ class RegisterPage extends Component {
       }
   };
 
+  getUlogovani = (token) => {
+    let AuthStr = 'Bearer '.concat(token);
+    let data = token
+
+    axios({
+      method: 'post' ,    
+      url: 'http://localhost:8099/getUser' ,  
+      data: data ,      
+      headers: { "Authorization": AuthStr }   
+    }).then((response) => {
+      if (response.data != null)
+      {
+        if(response.data.type === "PACIJENT"){          
+          this.props.history.pushState(null, 'patient-page');         
+        }
+          
+      }
+        
+    }, (error) => {
+      {
+        this.setState({message: "Neuspesno dobavljanje korisnika.", showResponse: true}) ;
+      }
+    });
+  }
+
   sendLogin = event => {
     event.preventDefault();
 
@@ -174,13 +200,12 @@ class RegisterPage extends Component {
       axios({
         method: 'post',
         url: 'http://localhost:8099/login',
-        data: data ,
-        ContentType: 'application/json'
+        data: data ,        
       }).then((response) => {
         if (response.status == 200)
         {
-          localStorage.setItem("ulogovan", response.accessToken) ;
-          this.setState({message: "Uspesno logovanje.", showResponse: true}) ;
+          localStorage.setItem("ulogovan", response.data.accessToken) ;
+          this.getUlogovani(response.data.accessToken);
         }
           
       }, (error) => {
