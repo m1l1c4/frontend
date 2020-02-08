@@ -1,20 +1,20 @@
 /*!
-
+ 
 =========================================================
 * Paper Kit React - v1.0.0
 =========================================================
-
+ 
 * Product Page: https://www.creative-tim.com/product/paper-kit-react
-
+ 
 * Copyright 2019 Creative Tim (https://www.creative-tim.com)
 * Licensed under MIT (https://github.com/creativetimofficial/paper-kit-react/blob/master/LICENSE.md)
-
+ 
 * Coded by Creative Tim
-
+ 
 =========================================================
-
+ 
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
+ 
 */
 import React, { Component } from "react";
 import axios from 'axios';
@@ -33,13 +33,13 @@ import {
     Label,
     Alert
 } from "reactstrap";
-
+ 
 // core components
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js';
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
 import DemoFooter from 'components/Footers/DemoFooter.js';
-
-
+ 
+ 
 class Checkup extends Component {
     constructor(props) {
         super(props);
@@ -98,9 +98,9 @@ class Checkup extends Component {
             }  
         };
     }
-
+ 
     doc = document.documentElement.classList.remove("nav-open");
-
+ 
     componentDidMount()
     {
       const {id} = this.props.match.params;
@@ -114,7 +114,7 @@ class Checkup extends Component {
         console.log(error);
       });
     }
-
+ 
     descriptionValidation(e){
         this.setState({informations:e.target.value})
         let desc = e.target.value
@@ -123,17 +123,17 @@ class Checkup extends Component {
         else
             this.setState({descVal:""})
     }
-
+ 
    
-
+ 
     dateValidation(e){
-    
+   
         let ddatum = e.target.value;
         let godina;
         let mjesec;
         let dan;
         godina = ddatum[0] + ddatum[1]+ddatum[2]+ddatum[3]
-    
+   
         mjesec = ddatum[5] + ddatum[6]
      
         dan = ddatum[8] + ddatum[9]
@@ -163,19 +163,19 @@ class Checkup extends Component {
           this.setState({messageDate1:"Dan je prosao"})
           this.setState({messageDate:"Dan je prosao"})
         }
-        else { 
+        else {
           this.setState({messageDate:""})
           this.setState({messageDate1:""})
       }
         this.setState({datumNovog:e.target.value})
      
-    
+   
       };
-
+ 
     promjenaTipaPregleda(e){
         this.setState({ tipPregleda:e.target.value});
       }
-
+ 
     handleOptionChangeDoctor(changeEvent) {
         let doc = this.state.temp2;
         let pom = parseInt(changeEvent.target.value, 10);
@@ -189,7 +189,7 @@ class Checkup extends Component {
             this.setState({temp2: items});
         }
     };
-
+ 
     handleOptionChangeDoctor2(doctor) {
       let doc = this.state.temp2;
       let pom = doctor.id;
@@ -198,9 +198,9 @@ class Checkup extends Component {
           doc.push(pom);
           this.setState({ selectedDoctor: pom, temp2:doc, appointmentDoctor:doctor});
       }
-
+ 
   };
-
+ 
     loadRooms = () => {
         axios({
             method: 'get',
@@ -214,17 +214,17 @@ class Checkup extends Component {
             console.log(error);
           });
     }
-
-
-
+ 
+ 
+ 
     dateValidation2(e){
-    
+   
         let ddatum = e.target.value;
         let godina;
         let mjesec;
         let dan;
         godina = ddatum[0] + ddatum[1]+ddatum[2]+ddatum[3]
-    
+   
         mjesec = ddatum[5] + ddatum[6]
      
         dan = ddatum[8] + ddatum[9]
@@ -250,21 +250,21 @@ class Checkup extends Component {
         else if(dan<date && mjesec<=month && godina<=year ){
           this.setState({messageDate1:"Datum ne moze biti raniji od prvobitno izabranog od strane doktora."})
         }
-        else { 
+        else {
           this.setState({messageDate:""})
           this.setState({messageDate1:""})
       }
         this.setState({datum:e.target.value})
       this.setState({datumRez:e.target.value})
-    
+   
       };
-
+ 
    logoutUser = () => {  
      localStorage.removeItem('ulogovan')
      localStorage.removeItem('role')
      this.props.history.push('/register-page');
    }
-
+ 
   sendEmailToDoctor = () => {
     axios({
       method: 'post',
@@ -278,7 +278,7 @@ class Checkup extends Component {
       console.log(error);
     });        
   }  
-
+ 
   sendEmailToPatient = () => {
     axios({
       method: 'post',
@@ -292,7 +292,7 @@ class Checkup extends Component {
       console.log(error);
     });        
   }  
-
+ 
   sendEmailDateChanged = () => {
     axios({
       method: 'post',
@@ -304,11 +304,11 @@ class Checkup extends Component {
     },(error)=>{
       //alert("GRESKA datum promjenjen");
       NotificationManager.error('Datum se ne moze promijeniti!', 'Greska!', 3000);
-
+ 
       console.log(error);
     });        
   }  
-
+ 
   timeValidation(e){
    
     this.setState({vrijeme:e.target.value})
@@ -320,15 +320,15 @@ class Checkup extends Component {
     else
         this.setState({messageTime:""})
   };
-
+ 
   redirect = () => {
     this.props.history.push('/register-page');
   }
-
+ 
   cancelSearchRoom = () => {
     this.setState({messageFilterSale:"", nazivSaleFiltriranje:"", tipSobeFiltriranje:this.state.checkup.type, rooms:this.state.allRooms, })
   }
-
+ 
   chooseRoom(room){
       let datum = room.firstFreeDate;
       let dan = datum[2];
@@ -340,11 +340,11 @@ class Checkup extends Component {
           mjesec = '0'+mjesec;
       }
       //this.setState({showRoomAvailability:true});
-      
+     
       axios({
         method: 'get',
         url: 'http://localhost:8099/clinic/roomAvailability/' +  room.id + '/' + datum[0] + '-' + mjesec + '-' + dan,
-      }).then((response)=>{       
+      }).then((response)=>{      
         this.setState({slobodniTermini:response.data, izabraniTermin:response.data[0], selectedRoom:room})
         this.setState({showSale:false, selectedDate: datum[0] + '-' + datum[1] + '-' + datum[2]});
     this.loadDoctors();
@@ -352,7 +352,7 @@ class Checkup extends Component {
         console.log(error);
       });
   }
-
+ 
   loadDoctors(){
     let datum = this.state.selectedRoom.firstFreeDate;
     let dan = datum[2];
@@ -366,7 +366,7 @@ class Checkup extends Component {
     axios({
       method: 'get',
       url: 'http://localhost:8099/getAllAvailable/' + this.state.checkup.clinic.id + '/'+ datum[0] + '-' + mjesec + '-' + dan + '/' + this.state.izabraniTermin,
-    }).then((response)=>{             
+    }).then((response)=>{            
       this.setState({doctors:response.data})
       let doc = response.data;
       if(doc.some( d => d.id === this.state.checkup.medicalWorker.id )){
@@ -384,110 +384,89 @@ class Checkup extends Component {
       console.log(error);
     });
   }
-  
+ 
   choose = () =>{
     let datum = this.state.selectedRoom.firstFreeDate;
     this.setState({showRoomAvailability: false, showSale:false, selectedDate: datum[0] + '-' + datum[1] + '-' + datum[2]});
     this.loadDoctors();
     }
-
-  update = () =>{
-    let data = {
-      "id" : this.state.checkup.id,
-      "date" : this.state.selectedRoom.firstFreeDate,
-      "room" : this.state.selectedRoom,
-      "time" : this.state.izabraniTermin,
-      "medicalWorker" : this.state.appointmentDoctor
-  };
-
-    axios({
-      method: 'post',
-      url: 'http://localhost:8099/checkup/update',
-      data:data,
-      ContentType: 'application/json',
-    }).then((response)=>{      
-        this.sendEmailToDoctor();
-        if(this.state.checkup.type === 'OPERACIJA'){
-          this.sendEmailToPatient();
-        }
-        let a = this.state.selectedRoom.firstFreeDate;
-        let b = this.state.checkup.date;
-        if(this.state.checkup.type === 'OPERACIJA' && !(a[0] === b[0] && a[1] === b[1] && a[2] === b[2])){
-          this.sendEmailDateChanged();
-        }
-          this.setState({message: "", showMessage: false})
-          //const redirect = this.redirect ;
-       // let timer =  setTimeout(this.props.history.push('/registration-request'), 5000)
-       //this.createNotification('info', 'Uspesno ste rezervisali salu.')
-       NotificationManager.success('Uspjesno ste rezervisali salu!', 'Uspjesno!', 3000);
-
-     //  let timerREdirection = setTimeout( this.redirect2, 1000);
-        
-    },(error)=>{
-     // alert("GRESKA");
-      console.log(error);
-    });
-  }
-
-  redirect2 = () =>{
-    let timer =  setTimeout(this.props.history.push('/registration-request'), 5000)
-  }
-
-  createNotification = (type, message) => {
-    return () => {
-      switch (type) {
-        case 'info':
-          NotificationManager.info(message, '', 3000);
-          break;
-        case 'success':
-          NotificationManager.success(message, '', 3000);
-          break;
-        case 'warning':
-          NotificationManager.warning(message, '', 3000);
-          break;
-        case 'error':
-          NotificationManager.error(message, '', 5000);
-          break;
+ 
+ 
+    update = () =>{
+      let worker = this.state.appointmentDoctor;
+      if(this.state.checkup.type === 'OPERACIJA'){
+        worker = null;
       }
+      let data = {
+        "id" : this.state.checkup.id,
+        "date" : this.state.selectedRoom.firstFreeDate,
+        "room" : this.state.selectedRoom,
+        "time" : this.state.izabraniTermin,
+        "medicalWorker" : worker
     };
-  }
+ 
+      axios({
+        method: 'post',
+        url: 'http://localhost:8099/checkup/update',
+        data:data,
+        ContentType: 'application/json',
+      }).then((response)=>{      
+          if(this.state.checkup.type === 'OPERACIJA'){          
+            this.addDoctors();
+          }
+          else{
+            this.sendEmailToDoctor();
+            this.props.history.push('/registration-request')
+          }
+      },(error)=>{
+       // alert("GRESKA");
+        console.log(error);
+      });
+    }
+     
     reserve(){
-
-        if(this.state.checkup.type === 'OPERACIJA'){
+        this.update();
+      }
+   
+     
+      addDoctors(){
           axios({
             method: 'post',
             url: 'http://localhost:8099/checkup/addDoctors/' + this.state.checkup.id,
             data:this.state.selectedDoctors,
             ContentType: 'application/json',
-          }).then((response)=>{     
-              this.update();
+          }).then((response)=>{
+            this.sendEmailToPatient();
+            let a = this.state.selectedRoom.firstFreeDate;
+          let b = this.state.checkup.date;
+          if(this.state.checkup.type === 'OPERACIJA' && !(a[0] === b[0] && a[1] === b[1] && a[2] === b[2])){
+            this.sendEmailDateChanged();
+          }
+            this.props.history.push('/registration-request')  
           },(error)=>{
            // alert("DOKTOR ZAUZET");
-           NotificationManager.info('Doktor je zauzet!', 'Info!!', 3000);
             console.log(error);
-          }); 
-        }
-        else{
-          this.update();
-        }
-    }
-
+          });
+         
+      }
+ 
+ 
   roomSearch = event => {
     event.preventDefault();
     let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
     let pom = [];
     pom.push(this.state.nazivSaleFiltriranje);
     pom.push(this.state.tipSobeFiltriranje);
-
+ 
     let ok = true;
     let ddatum = this.state.datumRez
     let godina;
     let mjesec;
     let dan;
     godina = ddatum[0] + ddatum[1]+ddatum[2]+ddatum[3]
-  
+ 
     mjesec = ddatum[5] + ddatum[6]
-    
+   
     dan = ddatum[8] + ddatum[9]
  
     let newDate = new Date();
@@ -497,7 +476,7 @@ class Checkup extends Component {
     godina = parseInt(godina)
     mjesec = parseInt(mjesec)
     dan = parseInt(dan)
-    
+   
    
   if(ddatum=== undefined || ddatum === ''){
     this.setState({messageDate1:"Datum je obavezno polje"})
@@ -517,13 +496,13 @@ class Checkup extends Component {
       ok = false;
     }
     else { this.setState({messageDate1:""})
-
+ 
     this.setState({datum:ddatum})
     }
-
+ 
  if(ok){
    pom.push(this.state.datumRez)
-    
+   
       axios({
         method: 'post',
         url: 'http://localhost:8099/clinic/searchRooms' ,
@@ -543,13 +522,13 @@ class Checkup extends Component {
       });
   }
 }
-
+ 
   render() {
     return (
       <>
         <ExamplesNavbar logoutEvent={this.logoutUser}
                         hideKalendar={true}
-                        
+                       
                         hideNewWorker = {true}
                         hideNewQuick = {true}
                         hideReceipts = {true}
@@ -579,8 +558,8 @@ class Checkup extends Component {
                             <h3>Pregled</h3>
                             <br></br>
                             <br></br>
-                            
-
+                           
+ 
                             <Modal modalClassName="modal-register" isOpen={this.state.showRoomAvailability}>
                                 <div className="modal-header no-border-header text-center">
                                     <button aria-label="Close" className="close" data-dismiss="modal" type="button" onClick={() => this.setState({ showRoomAvailability: false })}>
@@ -604,7 +583,7 @@ class Checkup extends Component {
                                     </Button>
                                 </div>
                             </Modal>
-
+ 
                             <Modal modalClassName="modal-register" isOpen={this.state.showDoctors}>
                                 <div className="modal-header no-border-header text-center">
                                     <button aria-label="Close" className="close" data-dismiss="modal" type="button" onClick={() => this.setState({ showDoctors: false })}>
@@ -642,7 +621,7 @@ class Checkup extends Component {
                                     </Button>
                                 </div>
                             </Modal>
-
+ 
                             <Form>
                                 <FormGroup>
                                     <label>Klinika: {this.state.checkup.clinic.name}</label>
@@ -702,15 +681,15 @@ class Checkup extends Component {
                                             </div>
                                             <div  className="col-md-3">
                                                 <Input name="datum" type="date" value={this.state.datumRez} onChange={(event) => this.dateValidation2(event)} />  
-                                                <p style={{color:'red'}}>{this.state.messageDate1}</p>     
-                                            </div>   
+                                                <p style={{color:'red'}}>{this.state.messageDate1}</p>    
+                                            </div>  
                                             <div  className="col-md-3">    
                                                 <Button block className="btn-round" color="info" onClick={this.roomSearch}>Pretrazi </Button>
                                             </div>
                                             <div  className="col-md-3">
                                                 <Button block className="btn-round" color="info" onClick={this.cancelSearchRoom}>Poništi pretragu</Button>
                                             </div>
-                                            <br></br><br></br> 
+                                            <br></br><br></br>
                                         </div>
                                     </section>
                                     <p style={{color:'red'}}>{this.state.messageFilterSale}</p>
@@ -725,8 +704,8 @@ class Checkup extends Component {
                                                                         <th className="text-primary font-weight-bold">Sale</th>
                                                                         <th className="text-primary font-weight-bold">Broj</th>
                                                                         <th className="text-primary font-weight-bold">Tip</th>
-                                                                        <th className="text-primary font-weight-bold">Prvi slobodan dan</th>   
-                                                                        <th className="text-primary font-weight-bold"></th>   
+                                                                        <th className="text-primary font-weight-bold">Prvi slobodan dan</th>  
+                                                                        <th className="text-primary font-weight-bold"></th>  
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>  
@@ -757,7 +736,7 @@ class Checkup extends Component {
                                     </div>
                             </Form>
                         </Col>
-
+ 
                     </Container>
                     <NotificationContainer/>
                 </div>
@@ -766,6 +745,5 @@ class Checkup extends Component {
         )
     };
 }
-
+ 
 export default Checkup;
-
