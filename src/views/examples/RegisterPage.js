@@ -22,6 +22,11 @@ import "assets/css/bootstrap.min.css";
 // reactstrap components
 import { Button, Alert, Form, FormGroup, Input, Modal, FormText } from "reactstrap";
 import { withRouter } from "react-router-dom";// core components
+
+
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
 // core components
 import ExamplesNavbar from "components/Navbars/ExamplesNavbar.js";
 
@@ -154,6 +159,7 @@ class RegisterPage extends Component {
             ContentType: 'application/json'            
           }).then((response) => {
             if (response.status === 200)
+            NotificationManager.success('Vas zahtev za registraciju je uspesno poslat!', 'Uspjesno!', 3000);
               this.setState({message: "Vas zahtev za registraciju je uspesno poslat." , showResponse: true}) ;
           }, (error) => {
             console.log(error);
@@ -246,6 +252,7 @@ class RegisterPage extends Component {
         headers: { "Authorization": AuthStr },
       }).then((response) => {
         console.log(response);
+        NotificationManager.success('Uspjesna izmjena lozinke!', 'Uspjesno!', 3000);
         if(response.data.type === "DOKTOR" || response.data.type === "MEDICINAR")
         this.props.history.push('/medicalworker-page');
         else{
@@ -320,11 +327,10 @@ class RegisterPage extends Component {
         "username": this.state.email ,        
         "password":this.state.password         
       };
-
       axios({
         method: 'post',
         url: 'http://localhost:8099/login',
-        data: data ,
+        data: data,
         ContentType: 'application/json'
       }).then((response) => {
         if (response.status === 200)
@@ -335,6 +341,7 @@ class RegisterPage extends Component {
         }
           
       }, (error) => {
+        NotificationManager.error('Neuspjesno logovanje!', 'Greska!', 3000);
           this.setState({message: "Neuspesno logovanje.", showResponse: true}) ;
       });
 
@@ -346,28 +353,30 @@ class RegisterPage extends Component {
   render() {
     return (
     <div>
-      <Alert color="info" isOpen={this.state.showResponse} toggle={this.onDismiss} >
-            <b>{this.state.message}</b> 
-      </Alert>
+      
       <ExamplesNavbar showRegister={() => this.setState({registerShow: true})} 
                       showLogin={() => this.setState({loginShow: true})}
+                      hideKalendar={true}
                       hideProfilEvent = {true}
-                      hideNewWorkerEvent = {true}
-                      hideQuickEvent = {true}
-                      hideRecipes = {true}
-                      hideCheckupTypes = {true}
-                      hideClinic = {true}
-                      hideAddClinic = {true}
-                      hideCodebook = {true}
-                      hideRegistrationRequest = {true}
-                      hideCheckup = {true}
-                      hideRooms = {true}
-                      hideDoctors = {true}
+                      hideNewWorker = {true}
+                      hideNewQuick = {true}
+                      hideReceipts = {true}
+                      hideTypeAdmin = {true}
+                      hideCodebookAdmin = {true}
+                      hideRequestsAdmin = {true}
+                      hidePregledi = {true}
+                      hidePatientKlinike = {true}
+                      hideCheckupDoctor = {true}
+                      hideRoomsAdmin = {true}
+                      hideDocsAdmin = {true}
                       hideClinics = {true}
+                      hideClinicInfoAdmin = {true}
+                      hideAddNewClinic = {true}
+                      hidePatientsDoc = {true}
+                      hideVacation = {true}
                       hideLogOut = {true}
                       sakrij = {true}
-                      hideAllQuicksEvent = {true}
-                      hideDoctorsEvent = {true}
+                      hideAllQuicksEvent = {true}                      
                       hideKarton = {true}
                       hidePregledi = {true}
                       
@@ -489,21 +498,22 @@ class RegisterPage extends Component {
                 <Form onSubmit={this.sendLogin}>                  
                   <FormGroup>
                     <label className="text-primary font-weight-bold"> Email</label>
-                    <Input className="form-control" name="email" placeholder="email" type="text" value={this.state.email} onChange={event => this.setState({email: event.target.value})} onBlur={this.mailValidation}/>
+                    <Input id = "loginEmail" className="form-control" name="email" placeholder="email" type="text" value={this.state.email} onChange={event => this.setState({email: event.target.value})} onBlur={this.mailValidation}/>
                   <FormText color="danger">{this.state.emailErrorText}</FormText>
                   </FormGroup>                  
                   <FormGroup>
                     <label className="text-primary font-weight-bold">Lozinka</label>
-                    <Input  name="password" className="form-control" placeholder="lozinka" type="password" value={this.state.password} onChange={event => this.setState({password: event.target.value})} />
+                    <Input id = "loginPassword"  name="password" className="form-control" placeholder="lozinka" type="password" value={this.state.password} onChange={event => this.setState({password: event.target.value})} />
                   </FormGroup>               
                   <p className="text-danger font-weight-bold" >{this.state.formErrorText}</p>                  
-                  <Button block className="btn-round" color="info" disabled={this.state.loginDisable}>
+                  <Button id="confirmButton" block className="btn-round" color="info" disabled={this.state.loginDisable}>
                     Prijavi se
                   </Button>
                   </Form>
                 
         </div>
         </Modal>
+        <NotificationContainer/>
     </div>
     )};
 }

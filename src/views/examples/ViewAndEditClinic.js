@@ -18,6 +18,10 @@
 */
 import React , {Component} from "react";
 import axios from 'axios';
+
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
  
  
 // reactstrap components
@@ -206,6 +210,7 @@ class ViewAndEditClinic extends Component {
         data: data,
         headers: { "Authorization": AuthStr }  
       }).then((response) => {
+        NotificationManager.success('Uspjesno dodata soba!', 'Uspjesno!', 3000);
         console.log(response);
         this.state.rooms.push(data)
         this.setState({newRoomShow: false});
@@ -214,7 +219,8 @@ class ViewAndEditClinic extends Component {
       }, (error) => {
         console.log(error);
         if(error.status === "ALREADY_REPORTED")
-        alert("Sala sa ovim imenom ili brojem vec postoji")
+       // alert("Sala sa ovim imenom ili brojem vec postoji")
+       NotificationManager.error('Greska prilikom dodavanja sobe!', 'Greska!', 3000);
       });
  
   }
@@ -319,7 +325,7 @@ if(ok){
   }, (error) => {
     console.log(error);
     if(error.status === 208)
-    this.setState({prihodiMessage: "Danasnji prihod je prikazan, za vise unesite dobre datume"})
+    this.setState({prihodiMessage: "Prikazan je danasnji prihod, za vise unesite dobre datume"})
   });
 }
  
@@ -385,11 +391,12 @@ addType = event => {
         headers: { "Authorization": AuthStr }  
       }).then((response) => {
         console.log(response);
-       
+        NotificationManager.success('Uspjesno dodavanje tipa!', 'Uspjesno!', 3000);
       }, (error) => {
         console.log(error);
         //if(error.status === "ALREADY_REPORTED")
         this.setState({message: "Tip pregleda sa ovim imenom u klinici vec postoji"})
+        NotificationManager.info('Tip sa ovim imenom vec postoji u klinici!', 'Info!', 3000);
       });
        
   }
@@ -431,11 +438,13 @@ deleteType(name, e){
     url: 'http://localhost:8099/checkUpType/deleteType/' + name,
     headers: { "Authorization": AuthStr }  
   }).then((response) => {
+     NotificationManager.success('Tip uspjesno izbrisan!', 'Uspjesno!', 3000);
     console.log(response);
   }, (error) => {
     console.log(error);
     if(error.status === "ALREADY_REPORTED")
     this.setState({message: "Greska u brisanju tipa"})
+    NotificationManager.error('Greska brisanja tipa!', 'Greska!', 3000);
   });
  // ovo u ok responsu
   const items = this.state.tipovi.filter(tip => tip.name !== name);
@@ -451,10 +460,14 @@ deleteType(name, e){
     headers: { "Authorization": AuthStr }  
   }).then((response) => {
     console.log(response);
+     NotificationManager.success('Uspjesno izbrisana soba!', 'Uspjesno!', 3000);
   }, (error) => {
     console.log(error);
-    if(error.status === 208)
-    this.setState({message: "Greska u brisanju sale"})
+    if(error.status === 208){
+       this.setState({message: "Greska u brisanju sale"})
+        NotificationManager.error('Greska brisanja sale!', 'Greska!', 3000);
+    }
+   
   const items = this.state.rooms.filter(room => room.name !== name);
   this.setState({ rooms: items });
 });
@@ -681,9 +694,11 @@ roomNumberValidation(e){
     }).then((response) => {
       console.log(response);
       this.setState({temp1: false});
+       NotificationManager.success('Uspjesna izmjena klinike!', 'Uspjesno!', 3000);
     }, (error) => {
       console.log(error);
       if(error.status === "ALREADY_REPORTED")
+       NotificationManager.error('Klinika sa ovim nazivom vec postoji!', 'Greska!', 3000);
       this.setState({message: "Klinika sa ovim nazivom vec postoji."})
     });
     this.setState({temp1: false});
@@ -858,12 +873,12 @@ if(ddatum=== undefined || ddatum === ''){
  
 logoutUser = () => {  
   localStorage.removeItem('ulogovan')
-  this.redirect()
- 
+  localStorage.removeItem('role')
+  this.props.history.push('/register-page');
 }
  
 redirect = () => {
-  this.props.history.push('/register-page');
+  this.props.history.push('/administrator-page');
 }
  
 render() {
@@ -874,14 +889,28 @@ render() {
     <>
      
       <ExamplesNavbar logoutEvent={this.logoutUser}
-                        hideRecipes = {true}
-                        hideAddClinic = {true}
-                        hideCodebook = {true}
-                        hideRegistrationRequest = {true}
-                        hideCheckup = {true}
-                        hideClinics = {true}
-                        hideLoginEvent = {true}
-                        hideRegisterEvent = {true} />
+                      showProfileEvent={this.redirect}
+                      hideKalendar={true}
+                      hideNewWorker = {true}
+                      hideNewQuick = {true}
+                      hideReceipts = {true}
+                      hideTypeAdmin = {true}                     
+                      hideRequestsAdmin = {true}
+                      hidePregledi = {true}
+                      hidePatientKlinike = {true}
+                      hideCheckupDoctor = {true}
+                      hideRoomsAdmin = {true}
+                      hideDocsAdmin = {true}
+                      hideClinics = {true}                     
+                      hideAddNewClinic = {true}
+                      hidePatientsDoc = {true}
+                      hideVacation = {true}                     
+                      sakrij = {true}
+                      hideAllQuicksEvent = {true}                      
+                      hideKarton = {true}
+                      hidePregledi = {true}
+                       hideRegisterEvent = {true}
+                       hideLoginEvent = {true}     />
  
       <ProfilePageHeader />
  
@@ -1215,6 +1244,8 @@ render() {
  
          
  </Container>
+ 
+<NotificationContainer/>
       </div>
  
     </>

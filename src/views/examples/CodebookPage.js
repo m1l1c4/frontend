@@ -18,6 +18,9 @@
 */
 import React , {Component} from "react";
 import axios from 'axios';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
 // reactstrap components
 import {
   Button,
@@ -128,6 +131,11 @@ class CodebookPage extends Component {
                 data: data,
                 ContentType: 'application/json'
                 }).then((response) => {
+
+                    if(this.state.type === 'DIJAGNOZA')  NotificationManager.success('Uspjesno dodavanje dijagnoza!', 'Uspjesno!', 3000);
+                    if(this.state.type === 'LIJEK')  NotificationManager.success('Uspjesno dodavanje lijeka!', 'Uspjesno!', 3000);
+
+                   
                     console.log(response);
                     this.setState({name:"", code:"", type:"LIJEK"})
                     this.state.codebook.push(data)
@@ -136,6 +144,7 @@ class CodebookPage extends Component {
                     this.setState({nameVal:""})
                 }, (error) => {
                 console.log(error);
+                    NotificationManager.error('Sifra mora biti jedinstvena', 'Greska!', 3000);
                 this.setState({codeVal: "Šifra mora biti jedinstvena."})
                 });
         }
@@ -164,8 +173,8 @@ showProfile(e){
 
   logoutUser = () => {  
     localStorage.removeItem('ulogovan')
-    this.redirect()
-   
+    localStorage.removeItem('role')
+    this.props.history.push('/register-page');
   }
 
   redirect = () => {
@@ -185,19 +194,32 @@ showProfile(e){
       <>
         
         <ExamplesNavbar logoutEvent={this.logoutUser} showProfileEvent={() => this.showProfile()}
-                      hideQuickEvent = {true}
-                      hideRecipes = {true}
-                      hideCheckupTypes = {true}
-                      hideClinic = {true}
-                      hideCheckup = {true}
-                      hideRooms = {true}
-                      hideDoctors = {true}
-                      hideClinics = {true}
-                      hideRegisterEvent = {true}
+                      hideKalendar={true}
+                      
+                      hideNewWorker = {true}
+                      hideNewQuick = {true}
+                      hideReceipts = {true}
+                      hideTypeAdmin = {true}
+                      hideCodebookAdmin = {true}
                       hideLoginEvent = {true}
+                      hidePregledi = {true}
+                      hidePatientKlinike = {true}
+                      hideCheckupDoctor = {true}
+                      hideRoomsAdmin = {true}
+                      hideDocsAdmin = {true}
+                      hideClinics = {true}
+                      hideClinicInfoAdmin = {true}
+                      hideAddNewClinic = {true}
+                      hidePatientsDoc = {true}
+                      hideVacation = {true}
+                      
+                      sakrij = {true}
+                      hideAllQuicksEvent = {true}                      
+                      hideKarton = {true}
+                      hidePregledi = {true}
                       showClinicPage={()=> this.showClinicPage()}
                       showRegistrationRequests = {() => this.showRegistrationRequests()}
-                      
+                      hideRegisterEvent = {true}
         />
         <ProfilePageHeader />
         <div className="section profile-content">
@@ -299,8 +321,9 @@ showProfile(e){
             </Col>
             
         </Container>
+        <NotificationContainer/>
       </div>
-      <DemoFooter />
+   
     </>
   )};
 }

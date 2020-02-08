@@ -7,6 +7,7 @@ import moment from 'moment'
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js';
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
 import axios from 'axios';
+import { NotificationManager } from "react-notifications";
 
 const localizer = momentLocalizer(moment)
 
@@ -23,7 +24,7 @@ class MyCalendar extends Component {
   componentDidMount(){
     let token = localStorage.getItem("ulogovan")
     let AuthStr = 'Bearer '.concat(token);
-    let data = 0;
+    let data = 1;
     axios({
       method: 'get',
       url: 'http://localhost:8099/checkup/getCheckups/'+data,
@@ -42,6 +43,7 @@ class MyCalendar extends Component {
           }
           let data = {
             id: checkups[i].id,
+            sala: checkups[i].room.name + ' ' +  checkups[i].room.number,
             patientId: checkups[i].patient.user.id,
             title: checkups[i].patient.user.name + ' ' + checkups[i].patient.user.surname,
             start: new Date(date[0], Number(date[1]) - 1, date[2], time, 0, 0),
@@ -58,6 +60,12 @@ class MyCalendar extends Component {
     });
   }
 
+  logoutUser = () => {  
+    localStorage.removeItem('ulogovan')
+    localStorage.removeItem('role')
+    this.props.history.push('/register-page');
+  }
+
     doc = document.documentElement.classList.remove("nav-open");
 
   handleClickEvent(e){
@@ -68,6 +76,7 @@ class MyCalendar extends Component {
     let temp = time.split(":");
     let time2 = (Number(temp[0])+1) + ':00:00';
     let data = {
+      sala: e.sala,
       patientId: e.patientId,
       id: e.id,
       title: e.title,
@@ -86,6 +95,56 @@ class MyCalendar extends Component {
   showDetails(id){
     this.props.history.push('/patient-page/' + id);
   }
+
+  cancelCheckup(id){
+    axios({
+      method: 'post',
+      url: 'http://localhost:8099/checkup/cancelCheckup/' + id ,             
+    }).then((response)=>{ 
+      if (response.status != 404)      
+      NotificationManager.info('Pregled uspjesno otkazan', '');
+
+      let token = localStorage.getItem("ulogovan")
+      let AuthStr = 'Bearer '.concat(token);
+      let data = 1;
+      axios({
+        method: 'get',
+        url: 'http://localhost:8099/checkup/getCheckups/'+data,
+        headers: { "Authorization": AuthStr },
+      }).then((response)=>{             
+        let checkups = response.data;
+        let temp = [];
+        for(let i= 0; i <checkups.length; i++){
+          if(checkups[i].scheduled){
+            let date = checkups[i].date;
+            let time = Number(checkups[i].time) - 1;
+            let endTime = Number(time) + 1;
+            let color = 'deepskyblue';
+            if(checkups[i].type === "PREGLED"){
+              color = 'mediumseagreen';
+            }
+            let data = {
+              id: checkups[i].id,
+              sala: checkups[i].room.name + ' ' +  checkups[i].room.number,
+              patientId: checkups[i].patient.user.id,
+              title: checkups[i].patient.user.name + ' ' + checkups[i].patient.user.surname,
+              start: new Date(date[0], Number(date[1]) - 1, date[2], time, 0, 0),
+              end: new Date(date[0], Number(date[1]) - 1, date[2], endTime, 0, 0),
+              color: color,
+              type: checkups[i].type
+            }
+            temp.push(data);
+          }
+        }
+        this.setState({events: temp})
+      },(error)=>{
+        console.log(error);
+      });
+      
+    },(error)=>{
+      console.log(error);
+    });
+  }
   
   handleViewChange(e){
     let data = {
@@ -98,10 +157,40 @@ class MyCalendar extends Component {
     this.setState({event: data})
   }
 
+  logoutUser = () => {  
+    localStorage.removeItem('ulogovan')
+    localStorage.removeItem('role')
+    this.props.history.push('/register-page');
+  }
+
   render() {
     return (
       <>
-        <ExamplesNavbar/>
+        <ExamplesNavbar recipes={() => this.loadRecipes()}
+                      logoutEvent={this.logoutUser}                      
+                      pacijentiEvent = {() => this.pacijentiEventShow()}
+                      absence = {() => this.setState({showNewAbsence:true})}
+                      showProfileEvent = {() => this.props.history.push('/medicalworker-page')}
+                      hideNewWorker = {true}
+                      hideNewQuick = {true}
+                      hideTypeAdmin = {true}
+                      hideCodebookAdmin = {true}
+                      hideRequestsAdmin = {true}                      
+                      hidePatientKlinike = {true}
+                      hideCheckupDoctor = {true}
+                      hideRoomsAdmin = {true}
+                      hideDocsAdmin = {true}
+                      hideClinics = {true}
+                      hideClinicInfoAdmin = {true}
+                      hideAddNewClinic = {true}                      
+                      hideVacation = {true}                      
+                      sakrij = {true}
+                      hideAllQuicksEvent = {true}                      
+                      hideKarton = {true}
+                      hidePregledi = {true}
+                      hideRegisterEvent = {true}
+                      hideLoginEvent = {true}
+                         />
         <ProfilePageHeader />
         <div>
     
@@ -162,6 +251,10 @@ class MyCalendar extends Component {
                                     <th>Kraj</th>
                                     <td align="left">{this.state.event.timeEnd}</td>
                                 </tr>
+                                <tr>
+                                    <th>Sala</th>
+                                    <td align="left">{this.state.event.sala}</td>
+                                </tr>
                                     
                                     <tr hidden = {this.state.event.type !== 'PREGLED'}>
                                         <td colSpan="2" align="left">
@@ -169,6 +262,13 @@ class MyCalendar extends Component {
                                         </td>
                                         <td></td>
                                     </tr>
+                                    <tr>
+                                    <td colSpan="2" align="left">
+                                            <Button block className="btn-round" color="info"  onClick={(e) => this.cancelCheckup(this.state.event.id)}>Otkaži pregled</Button>
+                                        </td>
+
+                                    </tr>
+
                             </tbody>
                         </Table>
                         </Row>

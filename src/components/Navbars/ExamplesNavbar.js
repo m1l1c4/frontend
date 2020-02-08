@@ -87,6 +87,7 @@ function ExamplesNavbar(props){
     };
   });
   return (
+    
     <Navbar
       className={classnames("fixed-top", navbarColor)}
       color-on-scroll="300"
@@ -116,7 +117,7 @@ function ExamplesNavbar(props){
          
 
           <Nav navbar>
-            <NavbarBrand onClick={props.showLogin} hidden={props.hideLoginEvent}
+            <NavbarBrand id="showModalLogin" onClick={props.showLogin} hidden={props.hideLoginEvent}
                 color="neutral" className="btn-link">
                   <i className="nc-icon nc-book-bookmark" /> Prijavi se
             </NavbarBrand>
@@ -129,34 +130,34 @@ function ExamplesNavbar(props){
                   <i className="nc-icon nc-book-bookmark" /> Registruj se
             </NavbarBrand>
             <NavbarBrand onClick={props.showNewWorker}
-                color="neutral" className="btn-link" hidden={(ulogovani !== "ADMINISTRATOR" && ulogovani !== "CCADMIN") || props.sakrij}>
+                color="neutral" className="btn-link" hidden={props.hideNewWorker}>
                   <i className="nc-icon nc-book-bookmark" /> Novi radnik
             </NavbarBrand> 
             <NavbarBrand onClick={props.showNewAppointment}
-                color="neutral" className="btn-link" hidden={ulogovani !== "ADMINISTRATOR" || props.sakrij}>
+                color="neutral" className="btn-link" hidden={ulogovani !== "ADMINISTRATOR" || props.hideNewQuick}>
                   <i className="nc-icon nc-book-bookmark" /> Brzi pregled
             </NavbarBrand>
             <NavbarBrand onClick={props.recipes}
-                color="neutral" className="btn-link" hidden={ulogovani !== "MEDICINAR"  || props.sakrij}>
+                color="neutral" className="btn-link" hidden={ulogovani !== "MEDICINAR" || props.hideReceipts}>
                   <i className="nc-icon nc-book-bookmark" /> Recepti
             </NavbarBrand>
             <NavbarBrand onClick={props.showTypeSearch}
-                color="neutral" className="btn-link" hidden={ulogovani !== "ADMINISTRATOR"  || props.sakrij}>
+                color="neutral" className="btn-link" hidden={ulogovani !== "ADMINISTRATOR" || props.hideTypeAdmin}>
                   <i className="nc-icon nc-book-bookmark" /> Tipovi pregleda
             </NavbarBrand>
             <NavbarBrand onClick={props.showCodebook}
-                color="neutral" className="btn-link" hidden={ulogovani !== "CCADMIN"  || props.sakrij}>
+                color="neutral" className="btn-link" hidden={ulogovani !== "CCADMIN"  || props.hideCodebookAdmin}>
                   <i className="nc-icon nc-book-bookmark" /> Šifarnik
             </NavbarBrand>
             <NavbarBrand onClick={props.showRegistrationRequests}
-                color="neutral" className="btn-link" hidden={(ulogovani !== "CCADMIN" && ulogovani !== "ADMINISTRATOR")  || props.sakrij}>
+                color="neutral" className="btn-link" hidden={props.hideRequestsAdmin}>
                   <i className="nc-icon nc-book-bookmark" /> Zahtevi
             </NavbarBrand>
             <NavbarBrand onClick={props.kartonEvent} hidden={props.hideKarton}
                 color="neutral" className="btn-link">
                   <i className="nc-icon nc-book-bookmark" /> Zdravstveni karton
             </NavbarBrand>
-            <NavbarBrand onClick={props.clickQuick} hidden={props.hideAllQuicksEvent}
+            <NavbarBrand id ="predefinisaniPregledi" onClick={props.clickQuick} hidden={props.hideAllQuicksEvent}
                 color="neutral" className="btn-link">
                   <i className="nc-icon nc-book-bookmark" /> Predefinisani pregledi
             </NavbarBrand>
@@ -164,31 +165,44 @@ function ExamplesNavbar(props){
                 color="neutral" className="btn-link">
                   <i className="nc-icon nc-book-bookmark" /> Pregledi  {  /*kod pacijenta za istoriju pregleda*/}
             </NavbarBrand>
-            <NavbarBrand onClick={props.displayClinics} hidden={ulogovani !== "PACIJENT" && props.sakrij}
+            <NavbarBrand id="allClinicsE2E" onClick={props.displayClinics} hidden={props.hidePatientKlinike}
                 color="neutral" className="btn-link">
                   <i className="nc-icon nc-book-bookmark" /> Klinike  {  /*kod pacijenta za istoriju pregleda*/}
             </NavbarBrand>
+            
             <NavbarBrand onClick={props.saleShow}
-                color="neutral" className="btn-link" hidden={ulogovani !== "ADMINISTRATOR"  || props.sakrij}>
+                color="neutral" className="btn-link" hidden={ulogovani !== "ADMINISTRATOR" || props.hideRoomsAdmin}>
                   <i className="nc-icon nc-book-bookmark" /> Sale
             </NavbarBrand>
             <NavbarBrand onClick={props.doktoriShow}
-                color="neutral" className="btn-link"  hidden={ulogovani != "ADMINISTRATOR"  || props.sakrij}>
+                color="neutral" className="btn-link"  hidden={ulogovani !== "ADMINISTRATOR" || props.hideDocsAdmin}>
                   <i className="nc-icon nc-book-bookmark" /> Doktori
             </NavbarBrand>
             <NavbarBrand onClick={props.doktoriShow}
                 color="neutral" className="btn-link"  hidden={props.hideClinics}>
                   <i className="nc-icon nc-book-bookmark" /> Klinike
             </NavbarBrand>
-            <NavbarBrand onClick={props.showClinicPage}
-                color="neutral" className="btn-link" hidden={ulogovani !== "ADMINISTRATOR"  || props.sakrij}>
+            <NavbarBrand onClick={props.showViewAndEditPage}
+                color="neutral" className="btn-link" hidden={ulogovani !== "ADMINISTRATOR" || props.hideClinicInfoAdmin}>
                   <i className="nc-icon nc-book-bookmark" /> Klinika
             </NavbarBrand>
             <NavbarBrand onClick={props.showClinicPage}
-                color="neutral" className="btn-link" hidden={ulogovani !== "CCADMIN"  || props.sakrij}>
+                color="neutral" className="btn-link" hidden={ulogovani !== "CCADMIN" || props.hideAddNewClinic}>
                   <i className="nc-icon nc-book-bookmark" /> Dodaj kliniku
             </NavbarBrand> 
-                                 
+            <NavbarBrand onClick={props.redirectKalendar} hidden={props.hideKalendar}
+                color="neutral" className="btn-link">
+                  <i className="nc-icon nc-book-bookmark" /> Kalendar
+            </NavbarBrand>                 
+            
+            <NavbarBrand onClick={props.pacijentiEvent} hidden={props.hidePatientsDoc}
+                color="neutral" className="btn-link">
+                  <i className="nc-icon nc-book-bookmark" /> Pacijenti
+            </NavbarBrand>
+            <NavbarBrand onClick={props.absence} hidden = {props.hideVacation}
+                color="neutral" className="btn-link">
+                  <i className="nc-icon nc-book-bookmark" /> Odmor
+            </NavbarBrand>
             <NavbarBrand onClick={props.logoutEvent} hidden={props.hideLogOut}
                 color="neutral" className="btn-link">
                   <i className="nc-icon nc-book-bookmark" /> Odjavi se

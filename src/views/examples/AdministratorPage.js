@@ -20,10 +20,18 @@ import React, { Component } from "react";
 import axios from 'axios';
  
 // reactstrap components
-import {
-  Button, FormGroup, Input, Container, Row, Col, Form, Modal, Label} from "reactstrap";
+import {Button, FormGroup, Input, Container,  Col, Form, Modal, Label, Table, Row} from "reactstrap";
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js';
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
+import { Calendar, momentLocalizer } from 'react-big-calendar'
+import moment from 'moment'
+
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
+
+const localizer = momentLocalizer(moment)
+
  
 class AdministratorPage extends Component {
   constructor(props) {
@@ -119,7 +127,16 @@ class AdministratorPage extends Component {
       showFiltriranjeSala:true,
       noviTipSale:"PREGLED",
       datumRez: "",
-      clicniCitava: {}
+      clicniCitava: {},
+      events:[],
+      event:{},
+      sort1: true,
+      sort2: true,
+      sort3: true,
+      sort4: true,
+      sort5: true,
+      sort6: true,
+      sort7: true,
     };
  
     this.updateOneAdministrator = this.updateOneAdministrator.bind(this);
@@ -185,7 +202,7 @@ class AdministratorPage extends Component {
         }).then((response) => {
             this.setState({showEditRoom: false});
             this.setState({nameTextP:""})
-            alert("Uspjesna izmjena sale!")
+            NotificationManager.success('Uspjesna izmjena sale!', 'Uspjesno!', 3000);
  
               axios({
                 method: 'get',
@@ -251,12 +268,12 @@ class AdministratorPage extends Component {
         }).then((response) => {
  
           if(response.status === 208){
-            alert("Sala sa ovim brojem vec postoji")
+            NotificationManager.error('Sala sa ovim brojem vec postoji', 'Greska!', 3000);
           }
           else {
             this.setState({newRoomShow: false});
             this.setState({roomVal:""})
-            alert("Uspjesno dodavanje sale!")
+            NotificationManager.success('Uspjesno dodavanje sale', 'Uspjesno!', 3000);
           }
               axios({
                 method: 'get',
@@ -319,14 +336,102 @@ cijenaTipaValidacija(e) {
       headers: { "Authorization": AuthStr }  
     }).then((response) => {
       console.log(response);
-        this.setState({dobavljeneSale:response.data, showFiltriranjeSala:true})
+      var today = new Date();
+    let ddatum = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        this.setState({dobavljeneSale:response.data, showFiltriranjeSala:true, datumRez: ddatum, brojSaleFiltriranje:''})
     }, (error) => {
       console.log(error);
    
     });
   }
  
+  sortByNaziv(){
+    let temp = this.state.dobavljeneSale;
+    if(this.state.sort5){
+      temp.sort(function(a,b){let ime1 = a.name; let ime2 = b.name; return ime2.localeCompare(ime1)})
+    }
+  else{
+    temp.sort(function(a,b){let ime1 = a.name; let ime2 = b.name; return ime1.localeCompare(ime2)})
+  }
+    this.setState({dobavljeneSale: []}) ;
+    this.setState({dobavljeneSale:temp,sort5: !this.state.sort5})
+  }
+
+  sortByTip(){
+    let temp = this.state.dobavljeneSale;
+    if(this.state.sort6){
+      temp.sort(function(a,b){let ime1 = a.typeRoom; let ime2 = b.typeRoom; return ime2.localeCompare(ime1)})
+    }
+  else{
+    temp.sort(function(a,b){let ime1 = a.typeRoom; let ime2 = b.typeRoom; return ime1.localeCompare(ime2)})
+  }
+    this.setState({dobavljeneSale: []}) ;
+    this.setState({dobavljeneSale:temp,sort6: !this.state.sort6})
+  }
+
+
+  sortByBroj(){
+    let temp = this.state.dobavljeneSale;
+    if(this.state.sort6){
+      temp.sort(function(a,b){let ime1 = a.number; let ime2 = b.number; return ime2-ime1})
+    }
+  else{
+    temp.sort(function(a,b){let ime1 = a.number; let ime2 = b.number; return ime1-ime2})
+  }
+    this.setState({dobavljeneSale: []}) ;
+    this.setState({dobavljeneSale:temp,sort6: !this.state.sort6})
+  }
+
+  sortByIme(){
+    let temp = this.state.doktori;
+    if(this.state.sort1){
+      temp.sort(function(a,b){let ime1 = a.user.name; let ime2 = b.user.name; return ime2.localeCompare(ime1)})
+    }
+  else{
+    temp.sort(function(a,b){let ime1 = a.user.name; let ime2 = b.user.name; return ime1.localeCompare(ime2)})
+  }
+    this.setState({doktori:temp,sort1: !this.state.sort1})
+  }
+
+  sortByZvanje(){
+    let temp = this.state.doktori;
+    if(this.state.sort4){
+      temp.sort(function(a,b){let z1 = a.user.type; let z2 = b.user.type; return z2.localeCompare(z1)})
+    }
+  else{
+    temp.sort(function(a,b){let z1 = a.user.type; let z2 = b.user.type; return z1.localeCompare(z2)})
+  }
+    this.setState({doktori:temp,sort4: !this.state.sort4})
+  }
+
+
+  sortBySpecijalizacija(){
+    let temp = this.state.doktori;
+    if(this.state.sort3){
+      temp.sort(function(a,b){let spec1 = a.type; let spec2 = b.type; return spec2.localeCompare(spec1)})
+    }
+  else{
+    temp.sort(function(a,b){let spec1 = a.type; let spec2 = b.type; return spec1.localeCompare(spec2)})
+  }
+    this.setState({doktori:temp,sort3: !this.state.sort3})
+  }
+
+  sortByPrezime(){
+    let temp = this.state.doktori;
+    if(this.state.sort2){
+      temp.sort(function(a,b){let prz1 = a.user.surname; let prz2 = b.user.surname; return prz2.localeCompare(prz1)})
+    }
+  else{
+    temp.sort(function(a,b){let prz1 = a.user.surname; let prz2 = b.user.surname; return prz1.localeCompare(prz2)})
+  }
+    this.setState({pacijenti:temp,sort2: !this.state.sort2})
+  }
+
+
   traziPoBroju = () => {
+        const items = this.state.dobavljeneSale.filter(room => room.number === parseInt(this.state.brojSaleFiltriranje));
+        this.setState({ dobavljeneSale: items });
+        /*
         let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
         let pom = [];
         pom.push(this.state.brojSaleFiltriranje);
@@ -353,6 +458,7 @@ cijenaTipaValidacija(e) {
         },(error)=>{
           console.log(error);
         });
+        */
   }
  
   cancelSearchDoctor = () => {
@@ -428,7 +534,7 @@ cijenaTipaValidacija(e) {
           data: data,
           headers: { "Authorization": AuthStr }  
         }).then((response) => {
-         
+          NotificationManager.success('Uspjesno dodavanje tipa!', 'Uspjesno!', 3000);
           console.log(response);
           axios({
             method: 'get',
@@ -451,7 +557,48 @@ cijenaTipaValidacija(e) {
          
     }
   };
-   
+  
+  
+  showCalendar = (roomId) => {
+    let token = localStorage.getItem("ulogovan")
+    let AuthStr = 'Bearer '.concat(token);
+ 
+    axios({
+      method: 'get',
+      url: 'http://localhost:8099/checkup/getCheckups/'+roomId,
+      headers: { "Authorization": AuthStr },
+    }).then((response)=>{             
+      let checkups = response.data;
+      let temp = [];
+      for(let i= 0; i <checkups.length; i++){
+        if(checkups[i].scheduled){
+          let date = checkups[i].date;
+          let time = Number(checkups[i].time) - 1;
+          let endTime = Number(time) + 1;
+          let color = 'deepskyblue';
+          if(checkups[i].type === "PREGLED"){
+            color = 'mediumseagreen';
+          }
+          let data = {
+            id: checkups[i].id,
+            patientId: checkups[i].patient.user.id,
+            title: checkups[i].medicalWorker.user.name + ' ' + checkups[i].medicalWorker.user.surname,
+            start: new Date(date[0], Number(date[1]) - 1, date[2], time, 0, 0),
+            end: new Date(date[0], Number(date[1]) - 1, date[2], endTime, 0, 0),
+            color: color,
+            type: checkups[i].type
+          }
+          temp.push(data);
+        }
+      }
+      this.setState({events: temp})
+      this.setState({calendarModal:true})
+    },(error)=>{
+      console.log(error);
+    });
+  }
+
+
   addTypeNew = () => {
     this.setState({addTypeModal:true})
   }
@@ -494,7 +641,7 @@ cijenaTipaValidacija(e) {
         headers: { "Authorization": AuthStr } ,
         ContentType: 'application/json'
       }).then((response) => {
-        console.log(response);
+        NotificationManager.success('Uspjesna izmjena lozinke!', 'Uspjesno!', 3000);
         this.setState({ changeData: false })
       }, (error) => {
         console.log(error);
@@ -506,6 +653,36 @@ cijenaTipaValidacija(e) {
  
   }
  
+    handleViewChange(e){
+    let data = {
+      title: "",
+      date: "",
+      timeStart: "",
+      timeEnd: "",
+      type: ""
+    }
+    this.setState({event: data})
+  }
+
+ handleClickEvent(e){
+    let dateTime = String(e.start);
+    dateTime = dateTime.split(" ");
+    let date = dateTime[1] + ' ' + dateTime[2] + ' ' + dateTime[3];
+    let time = dateTime[4];
+    let temp = time.split(":");
+    let time2 = (Number(temp[0])+1) + ':00:00';
+    let data = {
+      patientId: e.patientId,
+      id: e.id,
+      title: e.title,
+      date: date,
+      timeStart: time,
+      timeEnd: time2,
+      type: e.type
+    }
+    this.setState({event: data})
+  }
+
   addDoctor = event =>{
     event.preventDefault();
   }
@@ -525,6 +702,7 @@ cijenaTipaValidacija(e) {
       headers: { "Authorization": AuthStr }
     }).then((response) => {
       console.log(response);
+      NotificationManager.success('Uspjesno brisanje tipa!', 'Uspjesno!', 3000);
       axios({
         method: 'get',
         url: 'http://localhost:8099/clinic/getAllTypes',
@@ -552,15 +730,15 @@ cijenaTipaValidacija(e) {
  
  
       let ok = true;
-    let ddatum = this.state.datumRez
+    let ddatum = this.state.datumRez.split('-');
     let godina;
     let mjesec;
     let dan;
-    godina = ddatum[0] + ddatum[1]+ddatum[2]+ddatum[3]
+    godina = ddatum[0];
  
-    mjesec = ddatum[5] + ddatum[6]
+    mjesec = ddatum[1];
    
-    dan = ddatum[8] + ddatum[9]
+    dan = ddatum[2];
  
     let newDate = new Date();
     let date = parseInt(newDate.getDate())
@@ -592,9 +770,17 @@ cijenaTipaValidacija(e) {
  
     this.setState({datum:ddatum})
     }
- 
+    let danPom = dan;
+    let mjesecPom = mjesec;
+    if(dan < 10){
+      danPom = '0' + dan;
+    }
+    if(mjesec < 10){
+      mjesecPom = '0' + mjesec;
+    }
+    var datumPom = godina + '-' + mjesecPom + '-' + danPom;
  if(ok){
-   pom.push(this.state.datumRez)
+   pom.push(datumPom)
  
       axios({
         method: 'post',
@@ -604,7 +790,7 @@ cijenaTipaValidacija(e) {
         ContentType: 'application/json',
       }).then((response)=>{      
         if(response.status === 208)
-        this.setState({messageFilterSale: "Ne postoji trazeni sala u klinici"})
+            this.setState({messageFilterSale: "Ne postoji trazeni sala u klinici"})
     else {
       let pom = [];
       this.setState({dobavljeneSale: []}) ;
@@ -634,6 +820,7 @@ cijenaTipaValidacija(e) {
     }).then((response) => {
       console.log(response);
       if(response.status === 200){
+        NotificationManager.success('Uspjesno brisanje sobe!', 'Uspjesno!', 3000);
         axios({
           method: 'get',
           url: 'http://localhost:8099/clinic/getRooms',
@@ -643,6 +830,7 @@ cijenaTipaValidacija(e) {
             this.setState({dobavljeneSale:response.data})
         }, (error) => {
           console.log(error);
+          NotificationManager.error('Nije moguce izbrisati salu!', 'Greska!', 3000);
           this.setState({messageFilterSale:"Nije moguce izbrisati salu!"})
         });
       }
@@ -673,7 +861,7 @@ cijenaTipaValidacija(e) {
       ContentType: 'application/json',
     }).then((response) => {
       console.log(response);
-   
+      NotificationManager.success('Uspjesno brisanje doktora!', 'Uspjesno!', 3000);
       let token1 = localStorage.getItem("ulogovan")
       let AuthStr1 = 'Bearer '.concat(token1);
       axios({
@@ -690,6 +878,7 @@ cijenaTipaValidacija(e) {
  
     }, (error) => {
       console.log(error);
+      NotificationManager.error('Nije moguce izbrisati doktora!', 'Greska!', 3000);
       this.setState({messageDoktor:"Nije moguce izbrisati doktora"})
     });
   };
@@ -742,6 +931,7 @@ cijenaTipaValidacija(e) {
         ContentType: 'application/json',
       }).then((response) => {
         this.setState({poslijePoruka:"Nije moguce izmijeniti tip. (Postoji vec ili ima zakazan pregled tog tipa)"})
+        NotificationManager.error('Izmjena nije moguca', 'Greska!', 3000);
         this.setState({pomocna:"",prije:"",poslijePoruka:"", prijeCijena:"",showEditType:false})
         console.log(response);
         axios({
@@ -802,6 +992,7 @@ cijenaTipaValidacija(e) {
       }, (error) => {
     });
  
+   
  
     axios({
       method: 'get',
@@ -814,18 +1005,6 @@ cijenaTipaValidacija(e) {
         if(this.state.allTypes.length > 0){
           this.setState({tipTrenutni:response.data[0].name, })
         }
-    }, (error) => {
-      console.log(error);
-    });
- 
-    axios({
-      method: 'get',
-      url: 'http://localhost:8099/getAllDoctors',
-      headers: { "Authorization": AuthStr }  
-    }).then((response) => {
-      console.log(response);
-        this.setState({doktori:response.data, allDoctors:response.data})
-        this.setState({doktoriSearch:response.data})
     }, (error) => {
       console.log(error);
     });
@@ -849,9 +1028,10 @@ cijenaTipaValidacija(e) {
       headers: { "Authorization": AuthStr }  
     }).then((response) => {
       console.log(response);
-        this.setState({allRooms:response.data, dobavljeneSale:response.data})
+      const items = response.data.filter(room => room.typeRoom === 'PREGLED');
+        this.setState({allRooms:items, dobavljeneSale:response.data})
         if(this.state.allRooms.length > 0){
-          this.setState({salaTrenutna:response.data[0].number})
+          this.setState({salaTrenutna:items[0].number})
         }
     }, (error) => {
       console.log(error);
@@ -944,6 +1124,7 @@ cijenaTipaValidacija(e) {
         ContentType: 'application/json'
       }).then((response) => {
         console.log(response);
+        NotificationManager.success('Uspjesna izmjena podataka!', 'Uspjesno!', 3000);
         this.setState({ changeData: false })
       }, (error) => {
         console.log(error);
@@ -971,6 +1152,8 @@ cijenaTipaValidacija(e) {
   editRoom(name, number, e){
     this.setState({prelazNaziv:name, prijePromjene:number, prelazBroj:number, showEditRoom:true});
   };
+
+  
  
   nameValidation(e) {
     this.setState({ name1: e.target.value });
@@ -1338,12 +1521,14 @@ cijenaTipaValidacija(e) {
           headers: { "Authorization": AuthStr }  
         }).then((response) => {
           console.log(response);
-          alert('Uspjesno dodavanje pregleda!')
+          NotificationManager.success('Uspjesno dodavanje pregleda!', 'Uspjesno!', 3000);
+         // alert('Uspjesno dodavanje pregleda!')
           this.setState({temp1: false});
         }, (error) => {
           console.log(error);
           if(error.status === "ALREADY_REPORTED")
           this.setState({povratna: "Vec postoji zakazan pregled u ovom terminu"})
+          NotificationManager.error('Vec postoji zakazan pregled u ovom terminu!', 'Greska!', 3000);
         });
         this.setState({newAppointment:false})
       }
@@ -1553,7 +1738,8 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
           ContentType: 'application/json'
         }).then((response) => {
           console.log(response);
-          alert("Uspjesno je dodat novi radnik")
+        //  alert("Uspjesno je dodat novi radnik")
+        NotificationManager.success('Uspjesno je dodat novi radnik', 'Uspjeh!!', 3000);
           this.setState({ newWorker: false, workerName:"", workerSurname:"", workerEmail:"", workerType:"DOKTOR", workerPhone:"",
                         workerStartHr:"", workerEndHr:"",  });
                         let token = localStorage.getItem("ulogovan")
@@ -1570,7 +1756,8 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
                         });
         }, (error) => {
           console.log(error);
-          alert("Mejl mora biti jedinstven.")
+          NotificationManager.error('Email mora biti jedinstven', 'Greska!', 3000);
+          //alert("Mejl mora biti jedinstven.")
         });
       }
       else{
@@ -1590,11 +1777,13 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
             ContentType: 'application/json'
           }).then((response) => {
             console.log(response);
-            alert("Uspjesno je dodat novi radnik")
+            NotificationManager.success('Uspjesno je dodat novi radnik', 'Uspjeh!!', 3000);
+           // alert("Uspjesno je dodat novi radnik")
             this.setState({ newWorker: false, workerName:"", workerSurname:"", workerEmail:"", workerType:"ADMINISTRATOR"});
           }, (error) => {
             console.log(error);
-            alert("Mejl mora biti jedinstven.")
+            NotificationManager.error('Email mora biti jedinstven', 'Greska!', 3000);
+           // alert("Mejl mora biti jedinstven.")
           });
       }
     }    
@@ -1608,14 +1797,19 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
   showRegistrationRequests(e){
     this.props.history.push('/registration-request');
   }
+
+  showAddNewClinic(e){
+    this.props.history.push('/clinic-page');
+
+  }
  
   showClinicPage(e){
-    if(this.state.korisnik === 'CCADMIN'){
+    /*if(this.state.korisnik === 'CCADMIN'){
       this.props.history.push('/clinic-page');
     }
-    else{
+    else{*/
       this.props.history.push('/viewandeditclinic-page');
-    }
+    //}
   }
  
   noviPregled(e){
@@ -1636,6 +1830,22 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
     }, (error) => {
       console.log(error);
     });
+
+    
+    axios({
+      method: 'get',
+      url: 'http://localhost:8099/getAllDoctors',
+      headers: { "Authorization": AuthStr }  
+    }).then((response) => {
+      console.log(response);
+        let items = response.data.filter(doctor => doctor.type === this.state.tipTrenutni);
+        this.setState({doktoriSearch:response.data, doktor:items[0].user.email})
+        this.setState({doktori:response.data, allDoctors:response.data})
+    }, (error) => {
+      console.log(error);
+    });
+ 
+
   }
  
   getAllCheckupTypes(e){
@@ -1680,8 +1890,8 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
   }
   logoutUser = () => {  
     localStorage.removeItem('ulogovan')
-    this.redirect()
-   
+    localStorage.removeItem('role')
+    this.props.history.push('/register-page');
   }
  
   redirect = () => {
@@ -1728,20 +1938,28 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
                         showProfileEvent={() => this.setState({showProfile: false, showTypeSearchForm:true, saleModal: true, showDoctorsForm:true})}
                         showNewAppointment={() => this.noviPregled()}
                         showNewWorker={() => this.getAllCheckupTypes()}
-                        showClinicPage={()=> this.showClinicPage()}
+                        showViewAndEditPage={()=> this.showClinicPage()}
                         showCodebook={()=> this.showCodebook()}
                         showRegistrationRequests = {() => this.showRegistrationRequests()}
-                        hideRecipes = {true}
-                        hideAddClinic = {true}
-                        hideCodebook = {true}
-                        hideRegistrationRequest = {true}
-                        hideCheckup = {true}
-                        hideClinics = {true}
                         hideLoginEvent = {true}
+                        hideAddNewClinic = {false}
+                        hideClinicInfoAdmin = {false}
                         hideRegisterEvent = {true}
-                        hideAllQuicksEvent={true}
-                      hideKarton={true}
-                      hidePregledi={true}
+                        hideReceipts = {true}
+                        hideTypeAdmin = {true}
+                        hideCodebookAdmin = {false}
+                        hideKalendar={true}
+                        hidePregledi = {true}
+                        hidePatientKlinike = {true}
+                        hideCheckupDoctor = {true}                        
+                        hideClinics = {true}                         
+                        hidePatientsDoc = {true}
+                        hideVacation = {true}                        
+                        sakrij = {true}
+                        hideAllQuicksEvent = {true}                      
+                        hideKarton = {true}
+                        hidePregledi = {true}
+                        showClinicPage = {() => this.showAddNewClinic() }
                         />
         <ProfilePageHeader />
         <div className="section profile-content">
@@ -1811,11 +2029,11 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
                 <table className="table table-hover">
                   <thead>
                     <tr>
-                      <th className="text-primary font-weight-bold">Ime</th>
-                      <th className="text-primary font-weight-bold">Prezime</th>
+                      <th onClick={() => this.sortByIme()} className="text-primary font-weight-bold">Ime</th>
+                      <th onClick={() => this.sortByPrezime()} className="text-primary font-weight-bold">Prezime</th>
 
-                      <th className="text-primary font-weight-bold">Specijalizacija</th>
-                      <th className="text-primary font-weight-bold">Zvanje</th>
+                      <th onClick={() => this.sortBySpecijalizacija()} className="text-primary font-weight-bold">Specijalizacija</th>
+                      <th  onClick={() => this.sortByZvanje()} className="text-primary font-weight-bold">Zvanje</th>
 
                       {/*<th>Cena pregleda</th> */}              
                     </tr>
@@ -1914,22 +2132,22 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
                 <table className="table table-hover">
                   <thead>
                     <tr>
-                      <th className="text-primary font-weight-bold">Sale</th>
-                      <th className="text-primary font-weight-bold">Broj</th>
-                      <th className="text-primary font-weight-bold">Tip</th>
+                      <th onClick={() => this.sortByNaziv()} className="text-primary font-weight-bold">Naziv</th>
+                      <th onClick={() => this.sortByBroj()} className="text-primary font-weight-bold">Broj</th>
+                      <th onClick={() => this.sortByTip()}  className="text-primary font-weight-bold">Tip</th>
                       <th className="text-primary font-weight-bold">Prvi slobodan dan</th>
-                   
-                      {/*<th>Cena pregleda</th> */}              
+                      <th className="text-primary font-weight-bold">Kalendar zauzeca</th>
                     </tr>
                   </thead>
                
                   <tbody>  
                   {this.state.dobavljeneSale.map(sala => (
-                    <tr key={sala.name}>
+                    <tr key={sala.number}>
                         <td>{sala.name}</td>
                         <td>{sala.number}</td>
                         <td>{sala.typeRoom}</td>
                         <td> {sala.firstFreeDate[0]}-{sala.firstFreeDate[1]}-{sala.firstFreeDate[2]} </td>
+                        <td>     <Button  block className="btn-round" color="info"  onClick={(e) => this.showCalendar(sala.id)}>Vidi kalendar</Button> </td>
                   <td>     <Button  block className="btn-round" color="info"  onClick={(e) => this.editRoom(sala.name, sala.number, e)}>Izmijeni salu</Button> </td>
                   <td>      <Button block className="btn-round" color="info"  onClick={(e) => this.deleteRoom(sala.number, e)}>Izbrisi salu</Button> </td>
                
@@ -1945,7 +2163,7 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
     </section>
     </div>
  
-            <Modal  modalClassName="modal-register" isOpen={this.state.addTypeModal}>
+            <Modal modalClassName="modal-register" isOpen={this.state.addTypeModal}>
 <div className="modal-header no-border-header text-center">
           <button
             aria-label="Close"
@@ -1972,6 +2190,83 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
        Dodaj
         </Button>
         </Form>
+</div>
+</Modal>
+
+
+
+<Modal   style = {{maxWidth:"90vw"}} isOpen={this.state.calendarModal}>
+<div className="modal-header no-border-header text-center" >
+          <button
+            aria-label="Close"
+            className="close"
+            data-dismiss="modal"
+            type="button"
+            onClick={event => this.setState({calendarModal:false} )}
+          >
+          <span aria-hidden={true}>x</span>
+          </button>
+          </div>
+          <div  className="modal-body">
+          <div>
+            <Row>
+                <Col md={{ span: 0 }} xs={12}>
+                    <h3 align="center" className="border-bottom">Kalendar zauzeca sale</h3>
+                </Col>
+            </Row>
+            <Row>
+                <Col md={{offset: 1 }}  xs={9}>
+                  <Calendar 
+                    localizer={localizer}
+                    events={this.state.events}
+                    views={['day', 'week', 'month']}
+                    popupOffset={{x: 30, y: 20}}
+                    startAccessor="start"
+                    endAccessor="end"
+                    style={{height: 700}}
+                    onSelectEvent = {(e) => this.handleClickEvent(e)}
+                    eventPropGetter = {event => ({
+                      style: {backgroundColor : event.color}
+                    })}
+
+                    onView = {(e) => this.handleViewChange(e)}
+                  />
+                </Col>
+               
+                <Col md={{ span: 0, offset : 0}} xs={2}>
+                      <Row>&nbsp;</Row>
+                      <Row>&nbsp;</Row>
+                      <Row>&nbsp;</Row>
+
+                      <Row>
+                        <Table responsive>
+                            <tbody>
+                            <tr>
+                                    <td  colspan = {2} align = "center"><h4>Detalji</h4></td>
+                                </tr>
+                                <tr>
+                                    <th>Tip</th>
+                                    <td align="left">{this.state.event.type}</td>
+                                </tr>
+                                <tr>
+                                    <th>Datum</th>
+                                    <td align="left">{this.state.event.date}</td>
+                                </tr>
+                                <tr>
+                                    <th>Početak</th>
+                                    <td align="left">{this.state.event.timeStart}</td>
+                                </tr>
+                                <tr>
+                                    <th>Kraj</th>
+                                    <td align="left">{this.state.event.timeEnd}</td>
+                                </tr>
+                            </tbody>
+                        </Table>
+                        </Row>
+                    </Col>
+            </Row>
+        </div>
+
 </div>
 </Modal>
  
@@ -2416,6 +2711,8 @@ let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
               </Form>
             </Col>
           </Container>
+
+          <NotificationContainer/>
         </div>
  
       </>

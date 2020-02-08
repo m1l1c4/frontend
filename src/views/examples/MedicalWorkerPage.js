@@ -19,7 +19,9 @@
 import React , {Component} from "react";
 import axios from 'axios';
 
-
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
 // reactstrap components
 import {
   Button,
@@ -82,13 +84,19 @@ class MedicalWorkerPage extends Component {
       showNewAbsence: false,
       absenceStart: new Date(),
       absenceEnd: new Date(),
-      typeOfAbsence:"ODMOR"
+      typeOfAbsence:"ODMOR",
+      showListOfDoctors: true,
+      sort1: true,
+      sort2: true,
+      sort3:true,
     };
 
     this.updateOneWorker = this.updateOneWorker.bind(this);  
     this.cancelSearchPatients = this.cancelSearchPatients.bind(this);
     this.traziPacijente = this.traziPacijente.bind(this); 
     this.traziPoJBO = this.traziPoJBO.bind(this);
+   // this.sortByJBO = this.sortByJBO(this);
+    //this.sortByPrezime = this.sortByPrezime(this);
     this.pristupiPacijentu = this.pristupiPacijentu.bind(this);
     this.createAbsenceRequest = this.createAbsenceRequest.bind(this);
   }
@@ -139,10 +147,10 @@ class MedicalWorkerPage extends Component {
   this.props.history.push('/register-page');
 }
 
- logoutUser = () => {  
+logoutUser = () => {  
   localStorage.removeItem('ulogovan')
-  this.redirect()
- 
+  localStorage.removeItem('role')
+  this.props.history.push('/register-page');
 }
 
 
@@ -165,6 +173,7 @@ pristupiPacijentu(emailP, id, e){
       // 
      }
      else{
+      NotificationManager.info('Ne mozete pristupiti pacijentu!', 'Info!', 3000);
        this.setState({obavjestenje:"Ne mozete pristupiti pacijentu"});
      }
  }, (error) => {
@@ -226,6 +235,41 @@ if(brJBO=== undefined) {
 
 }
  
+sortByJBO  () {
+  let temp = this.state.pacijenti;
+  if(this.state.sort1){
+    temp.sort(function(a,b){let jbo1 = a.jbo; let jbo2 = b.jbo; return jbo2.localeCompare(jbo1)})
+  }
+  else{
+    temp.sort(function(a,b){let jbo1 = a.jbo; let jbo2 = b.jbo; return jbo1.localeCompare(jbo2)})
+  }
+ 
+  this.setState({pacijenti:temp, sort1: !this.state.sort1})
+}
+
+ 
+sortByPrezime(){
+  let temp = this.state.pacijenti;
+  if(this.state.sort2){
+    temp.sort(function(a,b){let prz1 = a.user.surname; let prz2 = b.user.surname; return prz2.localeCompare(prz1)})
+  }
+else{
+  temp.sort(function(a,b){let prz1 = a.user.surname; let prz2 = b.user.surname; return prz1.localeCompare(prz2)})
+}
+  this.setState({pacijenti:temp,sort2: !this.state.sort2})
+}
+
+sortByIme(){
+  let temp = this.state.pacijenti;
+  if(this.state.sort3){
+    temp.sort(function(a,b){let ime1 = a.user.name; let ime2 = b.user.name; return ime2.localeCompare(ime1)})
+  }
+else{
+  temp.sort(function(a,b){let ime1 = a.user.name; let ime2 = b.user.name; return ime1.localeCompare(ime2)})
+}
+  this.setState({pacijenti:temp,sort3: !this.state.sort3})
+}
+
 
 traziPoJBO = () => {
   let pom = [];
@@ -336,6 +380,7 @@ cancelSearchPatients = () => {
       data: data
     }).then((response) => {
       console.log(response);
+      NotificationManager.success('Izmjene su uspjesno obavljene!', 'Uspjesno!', 3000);
       this.setState({temp1: false});
     }, (error) => {
       console.log(error);
@@ -432,6 +477,12 @@ validacija4(e) {
   e.preventDefault();
 }
 
+
+pacijentiEventShow = (e) =>{
+  this.setState({showListOfDoctors:false})
+ 
+}
+
 changePassword = event => {
   event.preventDefault();
   this.setState({changeData:true})
@@ -465,6 +516,7 @@ changePassword = event => {
       ContentType: 'application/json'
     }).then((response) => {
       console.log(response);
+      NotificationManager.success('Uspjesna izmjena lozinke!', 'Uspjesno!', 3000);
       this.setState({ changeData: false })
     }, (error) => {
       console.log(error);
@@ -500,11 +552,12 @@ verify(id, e){
       headers: { "Authorization": AuthStr },
   }).then((response) => {
       console.log(response);
-      alert("Recept je uspjesno ovjeren");
+      //alert("Recept je uspjesno ovjeren");
+      NotificationManager.success('Recept je uspjesno ovjeren!', 'Uspjesno!', 3000);
       this.deleteRecipe(id);
   }, (error) => {
       console.log(error);
-      alert("Doslo je do greske");
+      NotificationManager.error('Doslo je do greske!', 'Greska!', 3000);
   });
 
 }
@@ -525,11 +578,13 @@ createAbsenceRequest = event => {
       data: data
   }).then((response) => {
       console.log(response);
-      alert("Zahtjev za odmor uspjesno poslat");
+     // alert("Zahtjev za odmor uspjesno poslat");
+     NotificationManager.success('Zahtjev za odmor uspjesno poslat!', 'Uspjesno!', 3000);
       this.setState({showNewAbsence:false, absenceStart: new Date(), absenceEnd: new Date(), absenceType:"ODMOR"})
   }, (error) => {
       console.log(error);
-      alert("Doslo je do greske");
+      NotificationManager.error('Doslo je do greske!', 'Greska!', 3000);
+     // alert("Doslo je do greske");
   });
 }
 
@@ -553,21 +608,29 @@ render() {
     <>
       <ExamplesNavbar showCheckup = {() => this.showCheckup()}
                       recipes={() => this.loadRecipes()}
-                      logoutEvent={this.logoutUser}
-                      hideNewWorkerEvent = {true}
-                      hideQuickEvent = {true}
-                      hideCheckupTypes = {true}
-                      hideClinic = {true}
-                      hideAddClinic = {true}
-                      hideCodebook = {true}
-                      hideRegistrationRequest = {true}
-                      hideCheckup = {true}
-                      hideRooms = {true}
-                      hideDoctors = {true}
-                      hideClinics = {true}
-                      hideRegisterEvent = {true}
-                      hideLoginEvent = {true}
+                      logoutEvent={this.logoutUser}                      
+                      pacijentiEvent = {() => this.pacijentiEventShow()}
                       absence = {() => this.setState({showNewAbsence:true})}
+                      redirectKalendar = {() => this.props.history.push('/calendar')}
+                      hideNewWorker = {true}
+                      hideNewQuick = {true}
+                      hideTypeAdmin = {true}
+                      hideCodebookAdmin = {true}
+                      hideRequestsAdmin = {true}
+                      hideLoginEvent = {true}
+                      hidePatientKlinike = {true}
+                      hideCheckupDoctor = {true}
+                      hideRoomsAdmin = {true}
+                      hideDocsAdmin = {true}
+                      hideClinics = {true}
+                      hideClinicInfoAdmin = {true}
+                      hideAddNewClinic = {true}
+                      hideRegisterEvent = {true}
+                                            
+                      sakrij = {true}
+                      hideAllQuicksEvent = {true}                      
+                      hideKarton = {true}
+                      hidePregledi = {true}
                       />
       <ProfilePageHeader />
       <div hidden = {!this.state.showRecipes}>
@@ -642,7 +705,7 @@ render() {
                       </select>
                   </FormGroup>
                   <FormGroup>
-                  <Label>Datum početka:</Label>
+                  <Label>Datum poèetka:</Label>
                   <Input type="date" className="form-control" value={this.state.absenceStart} onChange = {event => this.setState({absenceStart: event.target.value})}/>
                   </FormGroup>
                   <FormGroup>
@@ -734,8 +797,9 @@ render() {
 </div>
 </Modal>
 
+<div > </div>
 
-    <Col className="ml-auto mr-auto" md="6"> 
+    <Col   hidden={!this.state.showListOfDoctors} className="ml-auto mr-auto" md="6"> 
           <Form>
                   <FormGroup>
                   <label>Ime</label>
@@ -772,7 +836,7 @@ render() {
              </Col>
 
 
- <div >
+ <div hidden={this.state.showListOfDoctors} >
 <p className="text lead">Pretraga pacijenata</p>
         <section className="bar pt-0">
           <div className="row">            
@@ -833,9 +897,9 @@ render() {
                 <table className="table table-hover">
                   <thead>
                     <tr>
-                      <th className="text-primary font-weight-bold">Ime</th>
-                      <th className="text-primary font-weight-bold">Prezime</th>
-                      <th className="text-primary font-weight-bold">JBO</th>
+                      <th onClick={() => this.sortByIme()} className="text-primary font-weight-bold">Ime</th>
+                      <th onClick={() => this.sortByPrezime()} className="text-primary font-weight-bold">Prezime</th>
+                      <th onClick={() => this.sortByJBO()} className="text-primary font-weight-bold">JBO</th>
                    
                       {/*<th>Cena pregleda</th> */}              
                     </tr>
@@ -860,6 +924,8 @@ render() {
           </div>    
     </div>
     </section>
+    
+<NotificationContainer/>
     </div>
 
 

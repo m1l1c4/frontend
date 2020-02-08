@@ -39,20 +39,16 @@ import {
 
 import React , {Component} from "react";
 import axios from 'axios';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
 
-import "assets/css/bootstrap.min.css";
-import "assets/css/fontawesome.min.css";
-import withStyles from "@material-ui/core/styles/withStyles";
-
-
-
-import { cardTitle } from "assets/jss/material-dashboard-react.jsx";
-import Datetime from 'react-datetime';
+//import "assets/css/bootstrap.min.css";
+//import "assets/css/fontawesome.min.css";
 import { withRouter } from "react-router-dom";
 // core components
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js';
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
-import DemoFooter from 'components/Footers/DemoFooter.js';
 
 class ClinicHomePage extends Component {
     constructor(props)
@@ -82,7 +78,10 @@ class ClinicHomePage extends Component {
         types: [] ,
         clinic: null ,
         srchClicked: false ,
-        valMessage: ""
+        valMessage: "",
+        sort1: true,
+        sort2: true,
+        sort3: true,
         
       };
   
@@ -125,6 +124,41 @@ class ClinicHomePage extends Component {
     this.setState({isVisible: false});
   } 
 
+  sortByIme(){
+    let temp = this.state.doctors;
+    if(this.state.sort1){
+      temp.sort(function(a,b){let ime1 = a.user.name; let ime2 = b.user.name; return ime2.localeCompare(ime1)})
+    }
+  else{
+    temp.sort(function(a,b){let ime1 = a.user.name; let ime2 = b.user.name; return ime1.localeCompare(ime2)})
+  }
+    this.setState({doctors:temp,sort1: !this.state.sort1})
+  }
+
+  
+  sortByOcjena(){
+    let temp = this.state.doctors;
+    if(this.state.sort3){
+      temp.sort(function(a,b){let ime1 = a.rating; let ime2 = b.rating; return ime2-ime1})
+    }
+  else{
+    temp.sort(function(a,b){let ime1 = a.rating; let ime2 = b.rating; return ime1-ime2})
+  }
+    this.setState({clinics:temp,sort3: !this.state.sort3})
+  }
+
+  
+  sortBySpecijalizacija(){
+    let temp = this.state.doctors;
+    if(this.state.sort2){
+      temp.sort(function(a,b){let spec1 = a.type; let spec2 = b.type; return spec2.localeCompare(spec1)})
+    }
+  else{
+    temp.sort(function(a,b){let spec1 = a.type; let spec2 = b.type; return spec1.localeCompare(spec2)})
+  }
+    this.setState({doctors:temp,sort2: !this.state.sort2})
+  }
+
   returnToProfile = () => {
     this.props.history.push('/patient-page');
   }
@@ -139,12 +173,15 @@ class ClinicHomePage extends Component {
       headers: { "Authorization": AuthStr } ,       
     }).then((response)=>{ 
       if (response.status == 200) {
-        //this.getAllQuicks();     
-        this.setState({isVisible: true, messageAlert: "Uspešno zakazan brzi pregled!"}) ;
-        
+        this.getAllQuicks();     
+        NotificationManager.success('Uspjesno je zakazan brzi pregled!', 'Uspjesno!', 3000);
+        this.setState({isVisible: true }) ;
+        // messageAlert: "Uspešno zakazan brzi pregled!"
       } else {
-        //this.getAllQuicks(); 
-        this.setState({isVisible: true, messageAlert: "Izabrani pregled nije dostupan za zakazivanje."}) ;
+        this.getAllQuicks(); 
+        this.setState({isVisible: true});
+        NotificationManager.info('Izabrani pregled nije dostupan za zakazivanje!', 'Info!', 3000);
+        // messageAlert: "Izabrani pregled nije dostupan za zakazivanje."
       }
       
       
@@ -156,8 +193,7 @@ class ClinicHomePage extends Component {
   logoutUser = () => {  
     localStorage.removeItem('ulogovan')
     localStorage.removeItem('role')
-    this.redirect()
-   
+    this.props.history.push('/register-page');
   }
 
   redirect = () => {
@@ -322,9 +358,11 @@ class ClinicHomePage extends Component {
       data: checkup     
     }).then((response)=>{  
       if (response.status == 200) {
-        this.setState({messageAlert: "Uspešno ste poslali zahtev za zakazivanje pregleda", isVisible: true,showAppointment: false, selectedDoctor: null})
+        this.setState({ isVisible: true,showAppointment: false, selectedDoctor: null})
+        NotificationManager.success('Uspjesno ste poslali zahtjev za zakazivanje pregleda!', 'Uspjeh!', 3000);
+        // messageAlert: "Uspešno ste poslali zahtev za zakazivanje pregleda",
       }else {
-        alert("FAAAK JU NE MOZEEE")
+        NotificationManager.error('Greska prilikom zakazivanja pregleda!', 'Greska!', 3000);
       }
       
       
@@ -396,23 +434,33 @@ class ClinicHomePage extends Component {
   render() {
   return (
     <div>
-      <div>
-        <Alert color="success" isOpen={this.state.isVisible} toggle={this.onDismiss}>{this.state.messageAlert}</Alert>
-      </div>
-    
+  
   <>  
       <ExamplesNavbar logoutEvent={this.logoutUser} 
                       showDocs = {this.getAllDoctors}  
                       clickQuick = {this.getAllQuicks}                    
-                      hideRecipes = {true}
-                      hideCheckupTypes = {true}
-                      hideClinic = {true}
-                      hideCheckup = {true}
-                      hideRooms = {true}                      
-                      hideClinics = {true}
+                      hideKalendar={true}
                       hideLoginEvent = {true}
-                      hideRegisterEvent = {true}
-                      hideQuickEvent = {true}
+                      hideNewWorker = {true}
+                      hideNewQuick = {true}
+                      hideReceipts = {true}
+                      hideTypeAdmin = {true}
+                      hideCodebookAdmin = {true}
+                      hideRequestsAdmin = {true}
+                      hidePregledi = {true}
+                      hidePatientKlinike = {true}
+                      hideCheckupDoctor = {true}
+                      hideRoomsAdmin = {true}
+                      hideDocsAdmin = {true}
+                      hideClinics = {true}
+                      hideClinicInfoAdmin = {true}
+                      hideAddNewClinic = {true}
+                      hidePatientsDoc = {true}
+                      hideVacation = {true}
+                      
+                                          
+                      hideKarton = {true}
+                      hidePregledi = {true}
                       showProfileEvent = {this.returnToProfile}
                       hideKarton = {true}
                       hidePregledi = {true}
@@ -600,10 +648,10 @@ class ClinicHomePage extends Component {
                 <table className="table table-hover">
                   <thead>
                     <tr>
-                      <th className="text-primary font-weight-bold">Ime i prezime</th>
-                      <th className="text-primary font-weight-bold">Specijalizacija</th>
+                      <th  onClick={() => this.sortByIme()} className="text-primary font-weight-bold">Ime i prezime</th>
+                      <th  onClick={() => this.sortBySpecijalizacija()} className="text-primary font-weight-bold">Specijalizacija</th>
                       <th className="text-primary font-weight-bold">Radno vreme</th>
-                      <th className="text-primary font-weight-bold">Prosečna ocena</th>   
+                      <th  onClick={() => this.sortByOcjena()} className="text-primary font-weight-bold">Prosečna ocena</th>   
                             { (this.state.srchClicked) && <th className="text-primary font-weight-bold">Slobodni termini</th> }                                               
                     </tr>
                   </thead>
@@ -627,7 +675,7 @@ class ClinicHomePage extends Component {
     </section>  
     
     <section className="bar pt-0" hidden={this.state.hideQuicks} >
-    <div className="row"> 
+    <div id = "pregledi" className="row"> 
     {this.state.quicks.map(quick => (
     <Card style={{ width: "18rem", textAlign: "center"}} key={quick.id}  data-key={quick.id}>
           <CardBody>
@@ -651,6 +699,7 @@ class ClinicHomePage extends Component {
     </div>
 
     </>
+    <NotificationContainer/>
     </div>
   );}
 }

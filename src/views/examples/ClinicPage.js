@@ -34,6 +34,10 @@ import {
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js';
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
 import DemoFooter from 'components/Footers/DemoFooter.js';
+
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
  
 class ClinicPage extends Component {
     constructor(props)
@@ -246,6 +250,7 @@ class ClinicPage extends Component {
             ContentType: 'application/json'
             }).then((response) => {
                 console.log(response);
+                
                 axios({
                     method: 'post',
                     url: 'http://localhost:8099/clinic/addRooms/'+response.data.id,
@@ -262,8 +267,9 @@ class ClinicPage extends Component {
      
  
                 this.setState({name:"", city:"", address:""})
+                NotificationManager.success('Uspjesno dadavanje klinike!', 'Uspjesno!', 3000);
             }, (error) => {
-                alert("Greska prilikom dodavanja klinike");
+                NotificationManager.error('Greska prilikom dodavanja!', 'Greska!', 3000);
             console.log(error);
             });
  
@@ -277,8 +283,8 @@ class ClinicPage extends Component {
   }
   logoutUser = () => {  
     localStorage.removeItem('ulogovan')
-    this.redirect()
-   
+    localStorage.removeItem('role')
+    this.props.history.push('/register-page');
   }
  
   redirect = () => {
@@ -298,16 +304,28 @@ class ClinicPage extends Component {
       <>
        
         <ExamplesNavbar logoutEvent={this.logoutUser} showProfileEvent={() => this.showProfile()}
-                      hideQuickEvent = {true}
-                      hideRecipes = {true}
-                      hideCheckupTypes = {true}
-                      hideClinic = {true}
-                      hideCheckup = {true}
-                      hideRooms = {true}
-                      hideDoctors = {true}
+                      hideKalendar={true}
+                      
+                      hideNewWorker = {true}
+                      hideNewQuick = {true}
+                      hideReceipts = {true}
+                      hideTypeAdmin = {true}
+                      
+                      hidePregledi = {true}
+                      hidePatientKlinike = {true}
+                      hideCheckupDoctor = {true}
+                      hideRoomsAdmin = {true}
+                      hideDocsAdmin = {true}
                       hideClinics = {true}
-                      hideLoginEvent = {true}
+                      hideClinicInfoAdmin = {true}
+                      hideAddNewClinic = {true}
+                      hidePatientsDoc = {true}
+                      hideVacation = {true}
                       hideRegisterEvent = {true}
+                      hideLoginEvent = {true} 
+                      hideAllQuicksEvent = {true}                      
+                      hideKarton = {true}
+                      hidePregledi = {true}
                       showRegistrationRequests = {() => this.showRegistrationRequests()}
                       showCodebook={()=> this.showCodebook()}
         />
@@ -436,8 +454,9 @@ class ClinicPage extends Component {
             </Col>
            
         </Container>
+        <NotificationContainer/>
       </div>
-      <DemoFooter />
+     
     </>
   )};
 }

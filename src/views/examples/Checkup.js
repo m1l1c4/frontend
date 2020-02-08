@@ -18,6 +18,9 @@
 */
 import React, { Component } from "react";
 import axios from 'axios';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
 // reactstrap components
 import {
     Button,
@@ -28,12 +31,15 @@ import {
     Container,
     Col,
     Label,
+    Alert
 } from "reactstrap";
 
 // core components
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js';
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
 import DemoFooter from 'components/Footers/DemoFooter.js';
+
+
 class Checkup extends Component {
     constructor(props) {
         super(props);
@@ -46,6 +52,7 @@ class Checkup extends Component {
             dataValidation:"",
             messageDate1:"",
             datumNovog:"",
+            showMessage: true,
             showSale: false,
             rooms: [],
             allRooms: [],
@@ -61,6 +68,7 @@ class Checkup extends Component {
             selectedDoctors:[],
             doctors:[],
             temp2:[],
+            message: "" ,
             showDoctors: false,    
             selectedDoctor: '',
             appointmentDoctor:'',
@@ -207,6 +215,8 @@ class Checkup extends Component {
           });
     }
 
+
+
     dateValidation2(e){
     
         let ddatum = e.target.value;
@@ -249,11 +259,11 @@ class Checkup extends Component {
     
       };
 
-  logoutUser = () => {  
-    localStorage.removeItem('ulogovan')
-    this.redirect()
-   
-  }
+   logoutUser = () => {  
+     localStorage.removeItem('ulogovan')
+     localStorage.removeItem('role')
+     this.props.history.push('/register-page');
+   }
 
   sendEmailToDoctor = () => {
     axios({
@@ -261,9 +271,10 @@ class Checkup extends Component {
       url: 'http://localhost:8099/notifyDoctor/' + this.state.checkup.id,
       ContentType: 'application/json',
     }).then((response)=>{      
-      alert("USPJESNO email doktoru");
+     // alert("USPJESNO email doktoru");
+     NotificationManager.success('Uspjesno ste obavijestili doktora!', 'Uspjesno!', 3000);
     },(error)=>{
-      alert("GRESKA doktro");
+     // alert("GRESKA doktro");
       console.log(error);
     });        
   }  
@@ -274,9 +285,10 @@ class Checkup extends Component {
       url: 'http://localhost:8099/notifyPatient/' + this.state.checkup.id,
       ContentType: 'application/json',
     }).then((response)=>{      
-      alert("USPJESNO email pacijentu");
+     // alert("USPJESNO email pacijentu");
+     NotificationManager.success('Uspjesno ste obavijestili pacijenta!', 'Uspjesno!', 3000);
     },(error)=>{
-      alert("GRESKA pacijent");
+     // alert("GRESKA pacijent");
       console.log(error);
     });        
   }  
@@ -287,9 +299,12 @@ class Checkup extends Component {
       url: 'http://localhost:8099/changeDate/' + this.state.checkup.id,
       ContentType: 'application/json',
     }).then((response)=>{      
-      alert("USPJESNO datum promjenjen");
+      //alert("USPJESNO datum promjenjen");
+      NotificationManager.success('Uspjesan datum izmjena!', 'Uspjesno!', 3000);
     },(error)=>{
-      alert("GRESKA datum promjenjen");
+      //alert("GRESKA datum promjenjen");
+      NotificationManager.error('Datum se ne moze promijeniti!', 'Greska!', 3000);
+
       console.log(error);
     });        
   }  
@@ -324,12 +339,15 @@ class Checkup extends Component {
       if(mjesec < 10){
           mjesec = '0'+mjesec;
       }
-      this.setState({showRoomAvailability:true});
+      //this.setState({showRoomAvailability:true});
+      
       axios({
         method: 'get',
         url: 'http://localhost:8099/clinic/roomAvailability/' +  room.id + '/' + datum[0] + '-' + mjesec + '-' + dan,
-      }).then((response)=>{             
+      }).then((response)=>{       
         this.setState({slobodniTermini:response.data, izabraniTermin:response.data[0], selectedRoom:room})
+        this.setState({showSale:false, selectedDate: datum[0] + '-' + datum[1] + '-' + datum[2]});
+    this.loadDoctors();
       },(error)=>{
         console.log(error);
       });
@@ -397,12 +415,42 @@ class Checkup extends Component {
         if(this.state.checkup.type === 'OPERACIJA' && !(a[0] === b[0] && a[1] === b[1] && a[2] === b[2])){
           this.sendEmailDateChanged();
         }
+          this.setState({message: "", showMessage: false})
+          //const redirect = this.redirect ;
+       // let timer =  setTimeout(this.props.history.push('/registration-request'), 5000)
+       //this.createNotification('info', 'Uspesno ste rezervisali salu.')
+       NotificationManager.success('Uspjesno ste rezervisali salu!', 'Uspjesno!', 3000);
+
+     //  let timerREdirection = setTimeout( this.redirect2, 1000);
+        
     },(error)=>{
-      alert("GRESKA");
+     // alert("GRESKA");
       console.log(error);
     });
   }
 
+  redirect2 = () =>{
+    let timer =  setTimeout(this.props.history.push('/registration-request'), 5000)
+  }
+
+  createNotification = (type, message) => {
+    return () => {
+      switch (type) {
+        case 'info':
+          NotificationManager.info(message, '', 3000);
+          break;
+        case 'success':
+          NotificationManager.success(message, '', 3000);
+          break;
+        case 'warning':
+          NotificationManager.warning(message, '', 3000);
+          break;
+        case 'error':
+          NotificationManager.error(message, '', 5000);
+          break;
+      }
+    };
+  }
     reserve(){
 
         if(this.state.checkup.type === 'OPERACIJA'){
@@ -414,7 +462,8 @@ class Checkup extends Component {
           }).then((response)=>{     
               this.update();
           },(error)=>{
-            alert("DOKTOR ZAUZET");
+           // alert("DOKTOR ZAUZET");
+           NotificationManager.info('Doktor je zauzet!', 'Info!!', 3000);
             console.log(error);
           }); 
         }
@@ -498,24 +547,31 @@ class Checkup extends Component {
   render() {
     return (
       <>
-        
         <ExamplesNavbar logoutEvent={this.logoutUser}
-                      hideNewWorkerEvent = {true}
-                      hideQuickEvent = {true}
-                      hideRecipes = {true}
-                      hideCheckupTypes = {true}
-                      hideClinic = {true}
-                      hideAddClinic = {true}
-                      hideCodebook = {true}
-                      hideRegistrationRequest = {true}
-                      hideCheckup = {true}
-                      hideRooms = {true}
-                      hideDoctors = {true}
-                      hideClinics = {true}
-                      hideRegisterEvent = {true}
-                      hideLoginEvent = {true}
+                        hideKalendar={true}
+                        
+                        hideNewWorker = {true}
+                        hideNewQuick = {true}
+                        hideReceipts = {true}
+                        hideTypeAdmin = {true}
+                        hideCodebookAdmin = {true}                        
+                        hidePregledi = {true}
+                        hidePatientKlinike = {true}
+                        hideCheckupDoctor = {true}
+                        hideRoomsAdmin = {true}
+                        hideDocsAdmin = {true}
+                        hideClinics = {true}
+                        hideClinicInfoAdmin = {true}
+                        hideAddNewClinic = {true}
+                        hidePatientsDoc = {true}
+                        hideVacation = {true}                        
+                        sakrij = {true}
+                        hideAllQuicksEvent = {true}                      
+                        hideKarton = {true}
+                        hidePregledi = {true}
         />
                 <ProfilePageHeader />
+                <Alert hidden={this.state.showMessage}>{this.state.message}</Alert>
                 <div className="section profile-content">
                     <Container>
                         <Col className="ml-auto mr-auto" md="10">
@@ -532,7 +588,7 @@ class Checkup extends Component {
                                     </button>
                                     <h3 className="title mx-auto">Izaberite termin</h3>
                                 </div>
-                                <ul className="list-group">
+                                <ul className="list-group" id = "chooseTimeE2E">
                                     {this.state.slobodniTermini.map(termin => (
                                     <li key={termin} className="list-group-item">
                                         <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -606,7 +662,7 @@ class Checkup extends Component {
                                 <FormGroup>
                                     <label>Tip pregleda: {this.state.checkup.checkUpType.name}</label>
                                 </FormGroup>
-                                <Button block className="btn-round" color="info" onClick={() => {let datum = this.state.checkup.date; this.setState({showZakazivanje:true,showSale:true, datumRez:datum[0] + '-' + datum[1] + '-' + datum[2], tipSobeFiltriranje:this.state.checkup.type}); this.loadRooms()}} hidden={this.state.showSale}>
+                                <Button id = "findRoomE2E" block className="btn-round" color="info" onClick={() => {let datum = this.state.checkup.date; this.setState({showZakazivanje:true,showSale:true, datumRez:datum[0] + '-' + datum[1] + '-' + datum[2], tipSobeFiltriranje:this.state.checkup.type}); this.loadRooms()}} hidden={this.state.showSale}>
                                     Pronađi salu
                                 </Button>
                                 <div hidden = {this.state.selectedDate === ""}>
@@ -630,7 +686,7 @@ class Checkup extends Component {
                                         </div>
                                         <br>
                                         </br>
-                                        <Button block className="btn-round" color="info" onClick={() => this.reserve()}>
+                                        <Button id = "bookRoomE2E" block className="btn-round" color="info" onClick={() => this.reserve()}>
                                             Rezerviši salu
                                         </Button>
                                     </div>  
@@ -663,7 +719,7 @@ class Checkup extends Component {
                                                 <div  className="col-md-12">
                                                     <div className="box mt-0 mb-lg-0">
                                                         <div className="table-responsive">
-                                                            <table className="table table-hover">
+                                                            <table className="table table-hover" id = "chooseRoomE2E">
                                                                 <thead>
                                                                     <tr>
                                                                         <th className="text-primary font-weight-bold">Sale</th>
@@ -703,6 +759,7 @@ class Checkup extends Component {
                         </Col>
 
                     </Container>
+                    <NotificationContainer/>
                 </div>
                 <DemoFooter />
             </>
@@ -711,3 +768,4 @@ class Checkup extends Component {
 }
 
 export default Checkup;
+

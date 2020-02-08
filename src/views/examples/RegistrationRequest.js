@@ -27,6 +27,10 @@ import {
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js';
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
 import DemoFooter from 'components/Footers/DemoFooter.js';
+
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
  
 class RegistrationRequest extends Component {
     constructor(props) {
@@ -90,7 +94,7 @@ class RegistrationRequest extends Component {
         this.setState({explValVac:""})
         this.setState({reason:""})
     }
- 
+
     zakazi = (id) =>{
         this.props.history.push('/checkup/' + id);
     }
@@ -112,10 +116,12 @@ class RegistrationRequest extends Component {
                         data: pom,
                         headers: { "Authorization": AuthStr }  
                       }).then((response) => {
+                        NotificationManager.success('Uspjesno prihvatanje zahtjeva!', 'Uspjesno!', 3000);
                         console.log(response);
                         this.deleteRequestVacation(email);
                       }, (error) => {
                         console.log(error);
+                          NotificationManager.info('Zahtjev se ne moze odobriti!', 'Info!', 3000);
                         if(error.status === "ALREADY_REPORTED")
                         alert("Greska")
                       });
@@ -149,10 +155,12 @@ class RegistrationRequest extends Component {
                         data: pom,
                         headers: { "Authorization": AuthStr }  
                       }).then((response) => {
+                        NotificationManager.success('Uspjesno odbijanjee zahtjeva!', 'Uspjesno!', 3000);
                         console.log(response);
                         this.deleteRequestVacation(email);
                       }, (error) => {
                         console.log(error);
+
                         if(error.status === "ALREADY_REPORTED")
                         alert("Greska")
                       });
@@ -188,6 +196,7 @@ class RegistrationRequest extends Component {
                 url: 'http://localhost:8099/sendConfirm',
                 data: text,                
             }).then((response) => {
+                NotificationManager.success('Pacijent je uspjesno obavijesten!', 'Uspjesno!', 3000);
                 console.log(response);
                 //alert(response.data)
             }, (error) => {
@@ -213,6 +222,8 @@ class RegistrationRequest extends Component {
         }).then((response) => {
             console.log(response);
             //alert(response.data)
+            NotificationManager.success('Pacijent je uspjesno obavijesten!', 'Uspjesno!', 3000);
+
         }, (error) => {
             console.log(error);
         });
@@ -221,6 +232,8 @@ class RegistrationRequest extends Component {
     }
  
     componentDidMount(){
+        let role = localStorage.getItem('role');
+        this.setState({role: role});
         let token = localStorage.getItem("ulogovan")
         let AuthStr = 'Bearer '.concat(token);
         axios({
@@ -245,8 +258,8 @@ class RegistrationRequest extends Component {
         });
         axios({
             method: 'get',
-            url: 'http://localhost:8099/requestsForRoom',  
-            headers: { "Authorization": AuthStr }          
+            url: 'http://localhost:8099/requestsForRoom',   
+            headers: { "Authorization": AuthStr }           
         }).then((response) => {
             console.log(response);
             let pom = [];
@@ -261,14 +274,18 @@ class RegistrationRequest extends Component {
  
     logoutUser = () => {  
         localStorage.removeItem('ulogovan')
-        this.redirect()
-       
-      }
- 
-      redirect = () => {
+        localStorage.removeItem('role')
         this.props.history.push('/register-page');
       }
  
+      redirect = () => {
+        this.props.history.push('/administrator-page');
+      }
+ 
+      showViewAndEditPageEvent = () =>{
+        this.props.history.push('/viewandeditclinic-page');
+      }
+
       showClinicPage = () =>{
         this.props.history.push('/clinic-page');
       }
@@ -282,24 +299,37 @@ class RegistrationRequest extends Component {
           <>
            
             <ExamplesNavbar logoutEvent={this.logoutUser}
-                      hideQuickEvent = {true}
-                      hideRecipes = {true}
-                      hideCheckupTypes = {true}
-                      hideClinic = {true}
-                      hideCheckup = {true}
-                      hideRooms = {true}
-                      hideDoctors = {true}
-                      hideClinics = {true}
+                     showProfileEvent = {this.redirect}
+                     hideKalendar={true}
+                     hideNewWorker = {true}
+                     hideNewQuick = {true}
+                     hideReceipts = {true}
+                     hideTypeAdmin = {true}                     
+                     hideRequestsAdmin = {true}
+                     hidePregledi = {true}
+                     hidePatientKlinike = {true}
+                     hideCheckupDoctor = {true}
+                     hideRoomsAdmin = {true}
+                     hideDocsAdmin = {true}
+                     hideClinics = {true}                     
+                     hideAddNewClinic = {false}
+                     hideClinicInfoAdmin = {false}
+                     hidePatientsDoc = {true}
+                     hideVacation = {true}                     
+                     sakrij = {true}
+                     hideAllQuicksEvent = {true}                      
+                     hideKarton = {true}
+                     hidePregledi = {true}
                       hideRegisterEvent = {true}
                       hideLoginEvent = {true}                        
-                      showClinicPage={()=> this.showClinicPage()}
+                      showViewAndEditPage={()=> this.showViewAndEditPageEvent}
                       showCodebook={()=> this.showCodebook()}
             />
                 <ProfilePageHeader />
                 <div className="section profile-content">
                 <div id="wrapper">
  
-                    <section class="section lb">
+                    <section class="section lb" hidden = {this.state.role !== 'CCADMIN'}>
  
                             <div class="container">
                                 <div class="section-title text-center">
@@ -368,14 +398,13 @@ class RegistrationRequest extends Component {
         <br></br>
         <br></br>
     </div>
-    <ul className="list-group">
+    <ul className="list-group" id="zakaziE2E">
         {this.state.requestsForRoom.map(request => (
             <li key={request.id}>
                 <div class="col-lg-12 col-md-12">
                     <div class="blog-box" >
                         <div class="blog-desc">
                             <h4> Zahtjevi </h4>
-                            <p>Pacijent: {request.patient.user.name}  {request.patient.user.surname}</p>
                             <p>Doktor: {request.medicalWorker.user.name} {request.medicalWorker.user.surname} </p>
                             <p>Tip:  {request.type}</p>
                                 <button style ={{"margin-right":150, position: 'absolute', right: 0}} class="btn btn-primary" color="default" outline
@@ -453,8 +482,9 @@ class RegistrationRequest extends Component {
  
  
                         </div>
+                        <NotificationContainer/>
                 </div>
-                <DemoFooter />
+             
             </>
         )
     };

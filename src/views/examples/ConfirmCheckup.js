@@ -22,6 +22,9 @@ import "assets/css/bootstrap.min.css";
 // reactstrap components
 import { Button, Alert, Form, FormGroup, Container, Col, Row} from "reactstrap";
 import { withRouter } from "react-router-dom";
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
 // core components
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
 
@@ -92,6 +95,7 @@ class ConfirmCheckup extends Component {
       url: 'http://localhost:8099/checkup/scheduleCheckup/' + p ,      
     }).then((response)=>{      
         if (response.status === 200) {
+          NotificationManager.success('Vas pregled je uspjesno zakazan!', 'Uspjesno!', 3000);
             this.setState({message: "Vaš pregled je uspešno zakazan. Uskoro ćete biti preusmereni na početnu stranicu.", showResponse: true})
             //const redirect = this.redirect ;
             let timerREdirection = setTimeout( this.redirect, 5000);
@@ -110,6 +114,7 @@ class ConfirmCheckup extends Component {
       url: 'http://localhost:8099/checkup/cancelCheckup/' + p ,      
     }).then((response)=>{      
         if (response.status === 200) {
+          NotificationManager.success('Uspjesno ste otkazali pregled!', 'Uspjesno!', 3000);
             this.setState({message: "Otkazali ste pregled. Uskoro ćete biti preusmereni na početnu stranicu.", showResponse: true})
             let timerREdirection = setTimeout( this.redirect, 5000);
         }
@@ -192,7 +197,7 @@ class ConfirmCheckup extends Component {
                     </div>
         </Container>
       </div>
- 
+      <NotificationContainer/>
     </div>
     )};
 }

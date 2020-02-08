@@ -22,6 +22,9 @@ import "assets/css/bootstrap.min.css";
 // reactstrap components
 import { Button, Alert, Form, FormGroup, Container, Col, Row} from "reactstrap";
 import { withRouter } from "react-router-dom";
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
 // core components
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
 
@@ -73,16 +76,14 @@ class ActivateAccount extends Component {
   }  
 
   notactivate = () => {
-    this.setState({message: "Odbili ste zahtev za registraciju.", showResponse: true, });
+    NotificationManager.info('Odbili ste zahtjev za registraciju', 'Info!', 3000);
   }
   
   
   render() {
     return (
     <div>
-      <Alert color="info" isOpen={this.state.showResponse} toggle={() => this.setState({showResponse:false})}>
-            <b>{this.state.message}</b> 
-      </Alert>      
+          
       <ProfilePageHeader />
       <div className="section profile-content">
         <Container >
@@ -113,6 +114,7 @@ class ActivateAccount extends Component {
         </Container>
       </div>
  
+      <NotificationContainer/>
     </div>
     )};
 }

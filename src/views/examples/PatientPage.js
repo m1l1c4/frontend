@@ -30,12 +30,17 @@ import ExamplesNavbar from "components/Navbars/ExamplesNavbar.js";
 import RegisterModal from "components/RegisterModal";
 import ProfilePageHeader from 'components/Headers/ProfilePageHeader.js';
 
+
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
+
 class PatientPage extends Component {
   constructor(props)
   {
     super(props);
     this.state = {
-      showProfile: true ,      
+      showProfile: false ,      
       registerShow: false,
       loginShow: false,
       name: "" ,
@@ -79,7 +84,7 @@ class PatientPage extends Component {
       password11: "" ,
       changePass: false ,
       pretragaHappened: false , 
-      showKarton: false ,
+      showKarton: true ,
       checkupsHistory: [] ,
       icomingCheckups: [] ,
       // STATES FOR MEDICAL RECORD, NOT EDITABLE
@@ -110,7 +115,7 @@ class PatientPage extends Component {
       checkup: {},
       tipPregleda: "PREGLED",
       checkupExist: false ,
-      historyType: "" ,
+      historyType: "PREGLED" ,
       operationsHistory: [] ,
       incomingOperations: [] ,
       chooseTip: true ,
@@ -118,7 +123,21 @@ class PatientPage extends Component {
       infoRecepti: [] ,
       infoInfo: "" ,
       sala: "" ,
-      hideOperacije: true
+      sort1: true,
+      sort2: true,
+      sort3: true,
+      sort4: true,
+      hideOperacije: true,
+      canAccessToMedicalRecord: false,
+      selectedReport: {checkUp:{
+        medicalWorker:{
+          user:{
+            id: 0
+          }
+        }
+      }} ,
+      role: "",
+      ulogovani: {}
     };
 
     this.editPatient = this.editPatient.bind(this) ;
@@ -140,6 +159,7 @@ class PatientPage extends Component {
     this.toggle = this.toggle.bind(this);
     //
     this.startCheckup = this.startCheckup.bind(this);
+    this.getUlogovani = this.getUlogovani.bind(this);
     this.loadCheckup = this.loadCheckup.bind(this);
   }
       
@@ -152,16 +172,18 @@ class PatientPage extends Component {
   });*/
 
   componentDidMount(){
-    this.setState({showProfile: true})
-    this.getMedicalRecord();
+    this.getUlogovani();
     let role = localStorage.getItem('role');
+    this.getProfile();
     if (role === 'PACIJENT'){
-      this.getProfile();
       
-      this.getAllCheckupTypes();
+      this.setState({canAccessToMedicalRecord:true})      
     }
     if (role === 'DOKTOR'){
       this.loadCheckup();
+      this.pristupiPacijentu();
+    }
+    if(role === 'MEDICINAR'){
     }
    }
 
@@ -169,6 +191,44 @@ class PatientPage extends Component {
       let clinicId = event.target.parentElement.parentElement.getAttribute('data-key') 
       this.props.history.push('/clinic-homepage/' + clinicId);    
   }
+
+  getUlogovani = () => {
+    let token = localStorage.getItem("ulogovan")
+    let AuthStr = 'Bearer '.concat(token);
+    axios({
+      method: 'get' ,    
+      url: 'http://localhost:8099/getUser' ,           
+      headers: { "Authorization": AuthStr }   
+    }).then((response) => {
+      if (response.data != null)
+      {this.setState({ulogovani: response.data})}
+    }, (error) => {
+      this.setState({message: "Neuspesno dobavljanje korisnika.", showResponse: true}) ;
+  });
+}
+
+pristupiPacijentu(){
+
+  const {id} = this.props.match.params;
+ let token = localStorage.getItem("ulogovan")
+ let AuthStr = 'Bearer '.concat(token);
+ axios({
+   method: 'get',
+   url: 'http://localhost:8099/canAccessToMedicalRecord/' + id,
+   headers: { "Authorization": AuthStr }  ,
+ }).then((response) => {
+   console.log(response);
+     if(response.data === "DA"){
+      this.setState({canAccessToMedicalRecord:true})
+     }
+     else{
+       this.setState({canAccessToMedicalRecord:false});
+     }
+ }, (error) => {
+   console.log(error);
+ });
+  
+}
 
   changeRatingDoctor = (rating, name) => {
     let params = [] ;
@@ -183,10 +243,15 @@ class PatientPage extends Component {
       data: params
     }).then((response)=>{       
       if (response.status !== 200) {
-          Alert("Moguće je oceniti samo jednom doktora po pregledu.")
-      }      
+        
+        NotificationManager.info('Moguce je samo jednom ocijeniti doktora po pregledu!', 'Info!', 3000);
+         // Alert("Moguće je oceniti samo jednom doktora po pregledu.")
+      }  else {
+        NotificationManager.info('Doktor uspešno ocenjen!', 'Info!', 3000);
+        this.setState({ratingD: rating})
+      }    
     },(error)=>{
-      console.log(error);
+      NotificationManager.info('Moguce je samo jednom ocijeniti doktora po pregledu!', 'Info!', 3000);
     });
   }
 
@@ -202,11 +267,11 @@ class PatientPage extends Component {
       headers: { "Authorization": AuthStr }  ,
       data: params
     }).then((response)=>{       
-      if (response.status !== 200) {
-          Alert("Moguće je oceniti samo jednom kliniku po pregledu.")
+      if (response.status == 200) {
+        NotificationManager.info('Klinika je uspešno ocenjena', 'Info!', 3000);
       }      
     },(error)=>{
-      console.log(error);
+      NotificationManager.error('Kliniku je moguce ocjeniti samo jednom po pregledu', 'Info!', 3000);
     });
   }
 
@@ -266,7 +331,7 @@ class PatientPage extends Component {
   }
 
   cancelSearch = () => {
-    this.setState({hiddenForm: false})
+    this.setState({hiddenForm: false, hideFilter: true, pretragaHappened: false})
     this.getAllClinics();
   }
 
@@ -286,6 +351,7 @@ class PatientPage extends Component {
     }).then((response)=>{       
       localStorage.setItem('ulogovan', response.data.user.email)
       this.setState({showResponse: true, message: "Lozinka je uspesno promenjena."})
+      NotificationManager.success('Lozinka je uspjesno izmjenjena', 'Uspjesno!', 3000);
     },(error)=>{
       console.log(error);
     });
@@ -373,10 +439,13 @@ class PatientPage extends Component {
         headers: { "Authorization": AuthStr }  ,
         data: checkup     
       }).then((response)=>{ 
-        if (response.status === '200') {
+        if (response.status == '200') {
           this.setState({message: "Uspešno ste poslali zahtev za zakazivanje pregleda", showAppointment: false})
+          NotificationManager.success('Uspešno ste poslali zahtev za zakazivanje pregleda!', 'Uspjesno!', 3000);
         } else {
-          alert('NE MOZE DA ZAKAZE')
+          NotificationManager.info('Ne mozete posleti zahtjev za rigistraciju!', 'Info!', 3000);
+
+         // alert('NE MOZE DA ZAKAZE')
         }
         
         
@@ -420,8 +489,9 @@ class PatientPage extends Component {
     axios({
       method: 'get',
       url: 'http://localhost:8099/clinic/getClinics'      
-    }).then((response)=>{       
-      this.setState({clinics: response.data,
+    }).then((response)=>{    
+      this.getAllCheckupTypes();   
+      this.setState({clinics: response.data, chooseTip: true, hideOperacije: true,
       hideDokore: true, tableHistory: true, hideKlinike: false, hiddenForm: false, showKarton: true, showProfile: true})
     },(error)=>{
       console.log(error);
@@ -440,10 +510,10 @@ class PatientPage extends Component {
   getProfile = () => {
     //this.setState({showProfile: false}) ;
     let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));
-
+    const {id} = this.props.match.params; 
     axios({
       method: 'get',
-      url: 'http://localhost:8099/getPatientProfile',
+      url: 'http://localhost:8099/getPatientProfile/' + id,
       headers: { "Authorization": AuthStr }
     }).then((response)=>{      
       this.setState({name:response.data.user.name, email:response.data.user.email,surname:response.data.user.surname,phone:response.data.phoneNumber,password:response.data.user.password,
@@ -493,6 +563,8 @@ class PatientPage extends Component {
             if (response.status == 200)
               {
                 if (response.data != null)
+                NotificationManager.success('Uspešno ste izmjenili podatke!', 'Uspjesno!', 3000);
+
                 this.setState({name:response.data.user.name, email:response.data.user.email,surname:response.data.user.surname,phone:response.data.phoneNumber,password:response.data.user.password,
                   jbo: response.data.jbo , adress: response.data.adress , city: response.data.city , statee : response.data.state
     
@@ -532,13 +604,12 @@ class PatientPage extends Component {
       method: 'get',
       url: 'http://localhost:8099/getMedicalRecord/' + id,
       headers: { "Authorization": AuthStr }
-    }).then((response)=>{
+    }).then((response)=>{      
       let patient = response.data.patient; 
       this.setState({mrHeight: response.data.height , mrWeight: response.data.weight, 
         mrBloodType: response.data.bloodType, mrDiopt: response.data.diopter, diagnoses: response.data.diagnoses,
-        name:patient.user.name, email:patient.user.name, surname:patient.user.surname, phone:patient.phoneNumber,
-        jbo: patient.jbo, adress:patient.address, city:patient.city, statee:patient.state, mrId: response.data.id
-    })
+        mrId: response.data.id, hideDokore: true, tableHistory: true, showKarton: false, hiddenForm: true, hideKlinike: true, hideDoctors: true, showProfile: true, chooseTip: true, hideOperacije: true
+      })
     },(error)=>{
       console.log(error);
     });
@@ -547,18 +618,19 @@ class PatientPage extends Component {
   displayCheckups = (event) => {
     let type = this.state.historyType ;
     //this.setState({historyType: type})
-    let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan"));    
+    let AuthStr = 'Bearer '.concat(localStorage.getItem("ulogovan")); 
+    const {id} = this.props.match.params;   
     axios({
       method: 'post',
-      url: 'http://localhost:8099/checkup/patientHistory/' + type ,
+      url: 'http://localhost:8099/checkup/patientHistory/' + type + '/' + id ,
       headers: { "Authorization": AuthStr } ,     
     }).then((response)=>{     
       if (type === 'PREGLED') {
         this.setState({checkupsHistory: response.data["2"], icomingCheckups: response.data["1"], showProfile: true, 
-        showKarton: true, hideClinics: true, tableHistory: false, hideDokore: true, hideDocSearch: true})
+        showKarton: true, hideClinics: true, tableHistory: false, hideDokore: true, hideDocSearch: true, hideOperacije: true})
       } else {
         this.setState({operationsHistory: response.data["2"], incomingOperations: response.data["1"], showProfile: true, 
-      showKarton: true, hideClinics: true, tableHistory: true, hideDokore: true, hideDocSearch: true})
+      showKarton: true, hideClinics: true, tableHistory: true, hideDokore: true, hideDocSearch: true, hideOperacije: false})
       }
       
       //this.initPops(this.state.checkupsHistory.length)  // valjda ce se prvo setovati, pliz gad
@@ -580,6 +652,104 @@ class PatientPage extends Component {
         height: this.state.mrHeight,
         weight: this.state.mrWeight
       }
+      axios({
+        method: 'post',
+        url: 'http://localhost:8099/editMedicalRecord',
+        data: data,
+        ContentType: 'application/json'
+    }).then((response) => {
+        console.log(response);
+        NotificationManager.success('Uspjesna izmjena zdravstvenog kartona!', 'Uspjesno!', 3000);
+
+    },(error) => {
+        console.log(error);
+        NotificationManager.error('Greska izmjene zdravstvenog kartona!', 'Greska!', 3000);
+
+    });
+    }
+  }
+
+  sortByOcjena(){
+    let temp = this.state.clinics;
+    if(this.state.sort4){
+      temp.sort(function(a,b){let ime1 = a.rating; let ime2 = b.rating; return ime2-ime1})
+    }
+  else{
+    temp.sort(function(a,b){let ime1 = a.rating; let ime2 = b.rating; return ime1-ime2})
+  }
+    this.setState({clinics:temp,sort4: !this.state.sort4})
+  }
+
+  sortByOcjenaDoc(){
+    let temp = this.state.doctors;
+    if(this.state.sort4){
+      temp.sort(function(a,b){let ime1 = a.rating; let ime2 = b.rating; return ime2-ime1})
+    }
+  else{
+    temp.sort(function(a,b){let ime1 = a.rating; let ime2 = b.rating; return ime1-ime2})
+  }
+    this.setState({doctors:temp,sort4: !this.state.sort4})
+  }
+
+  sortByAdresa(){
+    let temp = this.state.clinics;
+    if(this.state.sort3){
+      temp.sort(function(a,b){let ime1 = a.address; let ime2 = b.address; return ime2.localeCompare(ime1)})
+    }
+  else{
+    temp.sort(function(a,b){let ime1 = a.address; let ime2 = b.address; return ime1.localeCompare(ime2)})
+  }
+    this.setState({clinics:temp,sort3: !this.state.sort3})
+  }
+  
+sortByNazivDoc(value){
+  let temp = this.state.doctors;
+  if(this.state.sort1){
+    temp.sort(function(a,b){let ime1 = a.name; let ime2 = b.name; return ime2.localeCompare(ime1)})
+  }
+else{
+  temp.sort(function(a,b){let ime1 = a.name; let ime2 = b.name; return ime1.localeCompare(ime2)})
+}
+  this.setState({doctors:temp,sort1: !this.state.sort1})
+}
+
+sortByCity(){
+  let temp = this.state.clinics;
+  if(this.state.sort2){
+    temp.sort(function(a,b){let ime1 = a.city; let ime2 = b.city; return ime2.localeCompare(ime1)})
+  }
+else{
+  temp.sort(function(a,b){let ime1 = a.city; let ime2 = b.city; return ime1.localeCompare(ime2)})
+}
+  this.setState({clinics:temp,sort2: !this.state.sort2})
+}
+
+
+
+  editReport = () => {
+    if(!this.state.enableMedRecChange){
+      this.setState({enableMedRecChange: true, buttonText:'Sačuvaj izmene'})   
+    }
+    else{
+      this.setState({enableMedRecChange: false, buttonText:'Izmeni'});
+      let report = this.state.selectedReport;
+      report.informations = this.state.infoInfo;
+      let token = localStorage.getItem("ulogovan")
+      let AuthStr = 'Bearer '.concat(token);
+      axios({
+        method: 'post',
+        url: 'http://localhost:8099/checkup/updateReport',
+        data: report,
+        ContentType: 'application/json',
+        headers: { "Authorization": AuthStr }  
+    }).then((response) => {
+        console.log(response);
+        NotificationManager.success('Uspjesna izmjena izvjestaja o pregledu', 'Uspjesno!', 3000);
+
+    },(error) => {
+        console.log(error);
+        NotificationManager.error('Greska izmjene izvjestaja o pregledu', 'Greska!', 3000);
+    });
          
     }
   }
@@ -595,7 +765,7 @@ class PatientPage extends Component {
       },(error)=>{
         console.log(error);
       });
-    this.setState({checkupStarted:true});
+    this.setState({checkupStarted:true, canAccessToMedicalRecord:true});
   }
 
   descriptionValidation(e){
@@ -638,7 +808,9 @@ if (ok) {
         ContentType: 'application/json'
     }).then((response) => {
         console.log(response);
-        alert("Izvještaj o pregledu je uspješno sacuvan u karton pacijenta.")
+       // alert("Izvještaj o pregledu je uspješno sacuvan u karton pacijenta.")
+       NotificationManager.success('Izvještaj o pregledu je uspješno sacuvan u karton pacijenta.', 'Uspjesno!', 3000);
+
 
         axios({
             method: 'post',
@@ -647,10 +819,11 @@ if (ok) {
             ContentType: 'application/json'
         }).then((response) => {
             console.log(response);
-            this.setState({checkupStarted:false})
         },(error) => {
             console.log(error);
-            alert("Greska prilikom dodavanja recepata");
+           // alert("Greska prilikom dodavanja recepata");
+           NotificationManager.error('Greska prilikom dodavanja recepata', 'Greska!', 3000);
+
         });
 
     }, (error) => {
@@ -742,11 +915,14 @@ else
           data: params,
           ContentType: 'application/json',
         }).then((response)=>{      
+          NotificationManager.success('Uspjesno ste poslali zahtjev za zakazivanje pregleda', 'Uspjesno!', 3000);
           this.setState({pacijenti: response.data}) ;
           this.setState({tipPregleda:"PREGLED" , vrijeme:"", showNoviPregled:false})
         },(error)=>{
           console.log(error);
           this.setState({messagePacijent: "Ne postoji pacijent "})
+          NotificationManager.error('Greska slanja zahtjeva za zakazivanje pregleda', 'Greska!', 3000);
+
         });
   }
 
@@ -841,7 +1017,6 @@ loadCheckup = () => {
   },(error)=>{
     console.log(error);
     this.setState({checkupExist: false})
-    alert("Ne postoji");
   });
 }
 
@@ -855,7 +1030,7 @@ checkupInfo = id => {
     if (response.status == 200)
       this.setState({infoDijagnoza: response.data.report.diagnose , infoInfo: response.data.report.informations
         , showProfile: true, chooseTip: true, infoRecepti: response.data.code.name , showDetailsCheckup: true ,
-      sala: response.data.report.checkUp.name})
+      sala: response.data.report.checkUp.room.name + ' ' + response.data.report.checkUp.room.number,selectedReport:response.data.report})
     
   },(error)=>{
     console.log(error);
@@ -866,28 +1041,27 @@ render() {
   let role = localStorage.getItem('role');
   return (
   <div>
-    <Alert color="info" isOpen={this.state.showResponse} toggle={this.onDismiss}>
-          <b>{this.state.message}</b> 
-    </Alert>
-    <ExamplesNavbar showProfileEvent={() => this.setState({hideDokore: true, showProfile: false, hiddenForm: true, hideKlinike: true, tableHistory: true, showKarton: true, chooseTip: true, hideOperacije: true})} 
+   <ExamplesNavbar showProfileEvent={() => this.setState({hideDokore: true, showProfile: false, hiddenForm: true, hideKlinike: true, tableHistory: true, showKarton: true, chooseTip: true, hideOperacije: true})} 
                     hideLoginEvent={true} hideRegisterEvent={true} 
-                    logoutEvent={this.logoutUser}                      
-                    hideNewWorkerEvent = {true}
+                    hideLoginEvent = {true}                     
+                    hideNewWorker = {true}
                     hideQuickEvent = {true}
                     hideRecipes = {true}
                     hideCheckupTypes = {true}
                     hideClinic = {true}
                     hideAddClinic = {true}
                     hideCodebook = {true}
-                    hideRegistrationRequest = {true}
+                    hideRequestsAdmin = {true}
                     hideCheckup = {true}
                     hideRooms = {true}
                     hideDoctors = {true}
                     hideClinics = {true}                      
-                    //sakrij = {true}    
+                    hideKalendar = {true}
+                    hidePatientsDoc = {true}   
+                    hideVacation = {true}
                     hideAllQuicksEvent = {true}
                     hideDoctorsEvent = {true}
-                    kartonEvent = {() => this.setState({hideDokore: true, tableHistory: true, showKarton: false, hiddenForm: true, hideKlinike: true, hideDoctors: true, showProfile: true, chooseTip: true, hideOperacije: true})}
+                    kartonEvent = {this.getMedicalRecord}
                     displayClinics = {this.getAllClinics}
                     displayHistory = {() => this.setState({chooseTip: false, showKarton: true, hiddenForm: true, hideKlinike: true, hideDoctors: true, showProfile: true , hideOperacije: true})}                       
     />
@@ -1051,7 +1225,7 @@ render() {
        </div>
 </section>
 <div>
-<div id="ZdravstveniKarton" hidden={this.state.showKarton && !this.state.checkupStarted}>
+<div id="ZdravstveniKarton" hidden={this.state.showKarton  || !this.state.canAccessToMedicalRecord }>
 <section className="bar pt-0" >
   <h1 className="text-info font-weight-bold align-center">Zdravstveni karton</h1>    
         <form className="border border-info rounded" style={{marginLeft:"auto", marginRight:"auto", padding:"10px"}}>
@@ -1133,7 +1307,7 @@ render() {
       </div>
     </div>
     <p></p>
-    <div className="row" hidden={this.state.showKarton}>
+    <div className="row" hidden={this.state.showKarton || !this.state.canAccessToMedicalRecord}>
    <div  className="col-md-12">
           <p className="text lead">Uspostavljene dijagnoze</p>
           <div className="box mt-0 mb-lg-0">
@@ -1202,7 +1376,7 @@ render() {
                                          
                     <div className="col-sm-3">
                     <div className="form-group">
-                      <label></label>
+                    <label style={{color: "white"}}>gbfhtjry</label>
                       <Button onClick={this.srchDoctors} block className="btn-round form-control" color="info">Pretraži</Button>
                     </div> </div>
                     </div>                      
@@ -1235,10 +1409,10 @@ render() {
               <table id = "tableE2E" className="table table-hover">
                 <thead>
                   <tr>
-                    <th className="text-primary font-weight-bold">Naziv klinike</th>
-                    <th className="text-primary font-weight-bold">Grad</th>
-                    <th className="text-primary font-weight-bold">Adresa klinike</th>
-                    <th className="text-primary font-weight-bold">Prosečna ocena</th>
+                    <th onClick={() => this.sortByNaziv()} className="text-primary font-weight-bold">Naziv klinike</th>
+                    <th onClick={() => this.sortByCity()}  className="text-primary font-weight-bold">Grad</th>
+                    <th onClick={() => this.sortByAdresa()}  className="text-primary font-weight-bold">Adresa klinike</th>
+                    <th onClick={() => this.sortByOcjena()} className="text-primary font-weight-bold">Prosečna ocena</th>
                     {this.state.pretragaHappened && <th className="text-primary font-weight-bold">Cena pregleda</th>}
                     <th className="text-primary font-weight-bold">Zvanična stranica</th>                     
                     {this.state.pretragaHappened && <th className="text-primary font-weight-bold">Doktori</th> }                                 
@@ -1274,9 +1448,9 @@ render() {
               <table className="table table-hover">
                 <thead>
                   <tr>
-                    <th className="text-primary font-weight-bold">Ime</th>
+                    <th onClick={() => this.sortByNazivDoc()} className="text-primary font-weight-bold">Ime</th>
                     <th className="text-primary font-weight-bold">Prezime</th>
-                    <th className="text-primary font-weight-bold">Prosečna ocena</th>
+                    <th onClick={() => this.sortByOcjenaDoc()} className="text-primary font-weight-bold">Prosečna ocena</th>
                     <th className="text-primary font-weight-bold">Slobodni termini</th>                            
                   </tr>
                 </thead>
@@ -1358,15 +1532,13 @@ render() {
         <div className="row">
                   <div className="col-md-12">
                     <div className="form-group">
-                      <label className="text-primary ">Sala: </label>
-                      <label className="text-primary font-weight-bold">Sala: </label>
+                      <label className="text-primary ">Sala: {this.state.sala}</label>
                     </div>
                   </div>
 
                   <div className="col-md-12">
                     <div className="form-group">
-                      <label className="text-primary ">Dijagnoza: </label>
-                      <label className="text-primary ">{this.state.infoDijagnoza}</label>
+                      <label className="text-primary ">Dijagnoza: {this.state.infoDijagnoza}</label>
                     </div>
                   </div>
                   </div>
@@ -1387,8 +1559,12 @@ render() {
                   <div className="row">
                   <div className="col-md-12">
                     <div className="form-group">
-                      <label className="text-primary">Informacije</label>
-                          <Input type="textarea" value={this.state.infoInfo} enabled={false}>{this.state.infoInfo}</Input>
+                      <label className="text-primary">Informacije:</label>
+                          <Input type="textarea" value={this.state.infoInfo} disabled={role !== 'DOKTOR' || this.state.buttonText === 'Izmeni'} onChange={(e) => this.setState({infoInfo:e.target.value})}>{this.state.infoInfo}</Input>
+                          <br></br>
+                          <Button hidden={this.state.ulogovani.id != this.state.selectedReport.checkUp.medicalWorker.user.id} block className="btn-round" color="info" onClick={() => this.editReport()}>
+          {this.state.buttonText}
+        </Button>       
                     </div>
                   </div>
                   </div>      
@@ -1655,7 +1831,7 @@ render() {
   </div>
 
 </section>
-<section className="bar pt-0" hidden={this.state.hideOperacije}>
+<section className="bar pt-0" hidden = {this.state.hideOperacije}>
 
  
   <div className="row">
@@ -1669,8 +1845,7 @@ render() {
                     <th className="text-primary font-weight-bold">Vrsta operacije</th>
                     <th className="text-primary font-weight-bold">Datum i vreme</th>
                     <th className="text-primary font-weight-bold">Doktor</th>
-                    <th className="text-primary font-weight-bold">Klinika</th> 
-                    <th className="text-primary font-weight-bold">Detalji</th>  {/* za detalje dodati report*/}                                                      
+                    <th className="text-primary font-weight-bold">Klinika</th>                                    
                   </tr>
                 </thead>
                 <tbody>  
@@ -1680,7 +1855,7 @@ render() {
                       <td>{checkup.date[2] + "." + checkup.date[1] + "." + checkup.date[0] + " , " + checkup.time + "h"}</td> 
                       <td>{checkup.medicalWorker.user.name + " " + checkup.medicalWorker.user.name}</td>
                       <td>{checkup.clinic.name}</td>  
-                      <td><Button color="info" onClick = {this.setSelected}>Proširi za detalje...</Button></td>                    
+                                          
                   </tr>
                   ))}
                   
@@ -1703,8 +1878,7 @@ render() {
                     <th className="text-primary font-weight-bold">Vrsta operacije</th>
                     <th className="text-primary font-weight-bold">Datum i vreme</th>
                     <th className="text-primary font-weight-bold">Doktor</th>
-                    <th className="text-primary font-weight-bold">Klinika</th> 
-                    <th className="text-primary font-weight-bold">Detalji</th>  {/* za detalje dodati report*/}                                                      
+                    <th className="text-primary font-weight-bold">Klinika</th>                                                                     
                   </tr>
                 </thead>
                 <tbody>  
@@ -1767,9 +1941,7 @@ render() {
                           </OverlayTrigger>
                         </span>
                         </td>  
-                      <td><Button color="info" onClick = {this.setSelected}>Proširi za detalje...</Button></td>                    
-                  
-                      
+                                          
                   
                   </tr>
                   ))}
@@ -1791,7 +1963,8 @@ render() {
 
 </Container>
     </div>
-                    
+            
+<NotificationContainer/>        
   </div>
   )};
 }
