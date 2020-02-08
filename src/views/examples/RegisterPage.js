@@ -20,11 +20,15 @@ import React , {Component} from "react";
 import axios from 'axios';
 import "assets/css/bootstrap.min.css";
 // reactstrap components
-import { Button, Alert, Form, FormGroup, Input, Container, Row, Col, Modal, FormText } from "reactstrap";
+import { Button, Alert, Form, FormGroup, Input, Modal, FormText } from "reactstrap";
+import { withRouter } from "react-router-dom";// core components
 
+
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import "../../../node_modules/react-notifications/lib/notifications.css"
+import "../../../node_modules/react-notifications/lib/Notifications.js"
 // core components
 import ExamplesNavbar from "components/Navbars/ExamplesNavbar.js";
-import RegisterModal from "components/RegisterModal";
 
 class RegisterPage extends Component {
   constructor(props)
@@ -51,7 +55,13 @@ class RegisterPage extends Component {
       emailValid: true ,
       showResponse: false ,
       loginDisable: true ,
-      message: ""
+      message: "",
+      changeFirstPass: false,
+      goToProfilePage: false,
+      password1: "",
+      password11: "",
+      password11Validation: "",
+      password1Validation: ""
     };
 
     this.sendRegistration = this.sendRegistration.bind(this) ;
@@ -62,7 +72,9 @@ class RegisterPage extends Component {
     this.cleanAll = this.cleanAll.bind(this) ;
     this.mailValidation = this.mailValidation.bind(this) ;
     this.sendLogin = this.sendLogin.bind(this) ;
+    this.changePassword = this.changePassword.bind(this);
     this.getUlogovani = this.getUlogovani.bind(this) ;
+    this.redirect = this.redirect.bind(this) ;
   }
       
   doc = document.documentElement.classList.remove("nav-open");
@@ -74,16 +86,16 @@ class RegisterPage extends Component {
   });*/
 
   validateEmptyFields = () => {     
-      if (this.state.name == "" || this.state.surname == "" || this.state.email == "" || this.state.jbo == "" || this.state.phone == "" || this.state.adress == "" || this.state.city == "" || this.state.statee == "" )
+      if (this.state.name === "" || this.state.surname === "" || this.state.email === "" || this.state.jbo === "" || this.state.phone === "" || this.state.adress === "" || this.state.city === "" || this.state.statee === "" )
       {
-          this.state.notFilledError = true;
+        this.setState({notFilledError:true});
       }
   }
 
   validateLoginFields = () => {     
-    if (this.state.email == "" || this.state.password == "" )
+    if (this.state.email === "" || this.state.password === "" )
     {
-        this.state.notFilledError = true;
+      this.setState({notFilledError:true});
     }
 }
 
@@ -94,7 +106,7 @@ class RegisterPage extends Component {
                     passErrorText: ""})
 
   handleMatching = (event) => {
-    if (this.state.password != event.target.value)
+    if (this.state.password !== event.target.value)
       {
         this.setState({formValid: true, passErrorText: "Lozinke se ne poklapaju."});    // disabling submit button
       } else {
@@ -146,7 +158,8 @@ class RegisterPage extends Component {
             data: data ,
             ContentType: 'application/json'            
           }).then((response) => {
-            if (response.status == 200)
+            if (response.status === 200)
+            NotificationManager.success('Vas zahtev za registraciju je uspesno poslat!', 'Uspjesno!', 3000);
               this.setState({message: "Vas zahtev za registraciju je uspesno poslat." , showResponse: true}) ;
           }, (error) => {
             console.log(error);
@@ -157,29 +170,147 @@ class RegisterPage extends Component {
       }
   };
 
+  redirect = (id) => {
+    this.props.history.push('/patient-page/' + id);
+  }
+
   getUlogovani = (token) => {
     let AuthStr = 'Bearer '.concat(token);
-    let data = token
 
     axios({
-      method: 'post' ,    
-      url: 'http://localhost:8099/getUser' ,  
-      data: data ,      
+      method: 'get' ,    
+      url: 'http://localhost:8099/getUser' ,           
       headers: { "Authorization": AuthStr }   
     }).then((response) => {
       if (response.data != null)
       {
         if(response.data.type === "PACIJENT"){          
-          this.props.history.pushState(null, 'patient-page');         
+              this.redirect(response.data.id); 
         }
-          
+        else if(response.data.type === "CCADMIN" || response.data.type === "ADMINISTRATOR" || response.data.type === "DOKTOR" || response.data.type === "MEDICINAR"){
+          if(!response.data.firstLogin){
+            this.setState({changeFirstPass:true, password1:"", password11:""})
+          }
+          else{
+            if(response.data.type === "DOKTOR" || response.data.type === "MEDICINAR")
+              this.props.history.push('/medicalworker-page');
+              else{
+                this.props.history.push('/administrator-page');
+              }
+          }
+        }
       }
-        
     }, (error) => {
-      {
         this.setState({message: "Neuspesno dobavljanje korisnika.", showResponse: true}) ;
-      }
     });
+  }
+
+  changePassword = event =>{
+    event.preventDefault();
+    let isOk = true;
+    let pass1 = this.state.password1;
+    let pass2 = this.state.password11;
+    if(pass1===''){
+      this.setState({password1Validation : "Ovo polje ne moze biti prazno"});
+      isOk = false;
+    }
+    else if(pass1!=='' || pass1===undefined){
+      this.setState({password1Validation : ""});
+      isOk = false;
+    }
+    else{
+      this.setState({password1Validation : ""});
+      isOk = true;
+    }
+  
+    if(pass2===''){
+      this.setState({password11Validation : "Ovo polje ne moze biti prazno"});
+      isOk = false;
+    }
+    else if(pass2!==undefined && this.state.password1!==this.state.password11){
+      this.setState({password11Validation: "Lozinke se moraju poklapati"})
+      isOk = false;
+    }
+    else if(pass2 === this.state.password1) {
+      this.setState({password11Validation: ""})
+      isOk = true;
+    }
+    else{
+      this.setState({password11Validation : ""});
+      isOk = true;
+    }
+    if(isOk){
+      this.setState({changeFirstPass : false});
+      let text = []
+      text.push(pass1)
+      let token = localStorage.getItem("ulogovan")
+      let AuthStr = 'Bearer '.concat(token);
+      axios({
+        method: 'post',
+        url: 'http://localhost:8099/changePassword',
+        data: text,
+        headers: { "Authorization": AuthStr },
+      }).then((response) => {
+        console.log(response);
+        NotificationManager.success('Uspjesna izmjena lozinke!', 'Uspjesno!', 3000);
+        if(response.data.type === "DOKTOR" || response.data.type === "MEDICINAR")
+        this.props.history.push('/medicalworker-page');
+        else{
+          this.props.history.push('/administrator-page');
+        }
+      }, (error) => {
+        console.log(error);
+      });
+     }
+  };
+
+  
+
+  pass1Validation(e) {
+    this.setState({password1 : e.target.value});
+    let sun = e.target.value;
+    if(sun===''){
+      this.setState({password1Validation : "Ovo polje ne moze biti prazno"});
+    }
+    else if(sun!==''){
+      this.setState({password1Validation : ""});
+    }
+    else{
+      this.setState({password1Validation : ""});
+    }
+  }
+  
+  pass2Validation(e) {
+    this.setState({password11 : e.target.value});
+    let sun = e.target.value;
+    if(sun===''){
+      this.setState({password11Validation : "Ovo polje ne moze biti prazno"});
+    }
+    else if(sun!==undefined && this.state.password1!==e.target.value){
+      this.setState({password11Validation: "Lozinke se moraju poklapati"})
+    }
+    else if(sun === this.state.password1) {
+      this.setState({password11Validation: ""})
+    }
+    else{
+      this.setState({password11Validation : ""});
+    }
+  }
+
+  getRole = () => {
+    let AuthStr = 'Bearer '.concat(localStorage.getItem('ulogovan'))
+      axios({
+        method: 'get',
+        url: 'http://localhost:8099/rollingInTheDeep' ,
+        headers: { "Authorization": AuthStr }             
+      }).then((response)=>{  
+        if (response.status !== 404) {
+          localStorage.setItem('role', response.data);
+        }       
+      },(error)=>{
+        alert("GRESKAAA")
+        console.log(error);
+      });
   }
 
   sendLogin = event => {
@@ -196,37 +327,60 @@ class RegisterPage extends Component {
         "username": this.state.email ,        
         "password":this.state.password         
       };
-
       axios({
         method: 'post',
         url: 'http://localhost:8099/login',
-        data: data ,        
+        data: data,
+        ContentType: 'application/json'
       }).then((response) => {
-        if (response.status == 200)
+        if (response.status === 200)
         {
-          localStorage.setItem("ulogovan", response.data.accessToken) ;
+          localStorage.setItem("ulogovan", response.data.accessToken);
           this.getUlogovani(response.data.accessToken);
+          this.getRole();
         }
           
       }, (error) => {
-        {
+        NotificationManager.error('Neuspjesno logovanje!', 'Greska!', 3000);
           this.setState({message: "Neuspesno logovanje.", showResponse: true}) ;
-        }
       });
 
       this.cleanAll();
       
   }
 };
-
   
   render() {
     return (
     <div>
-      <Alert color="info" isOpen={this.state.showResponse} toggle={this.onDismiss}>
-            <b>{this.state.message}</b> 
-      </Alert>
-      <ExamplesNavbar showRegister={() => this.setState({registerShow: true})} showLogin={() => this.setState({loginShow: true})}/>
+      
+      <ExamplesNavbar showRegister={() => this.setState({registerShow: true})} 
+                      showLogin={() => this.setState({loginShow: true})}
+                      hideKalendar={true}
+                      hideProfilEvent = {true}
+                      hideNewWorker = {true}
+                      hideNewQuick = {true}
+                      hideReceipts = {true}
+                      hideTypeAdmin = {true}
+                      hideCodebookAdmin = {true}
+                      hideRequestsAdmin = {true}
+                      hidePregledi = {true}
+                      hidePatientKlinike = {true}
+                      hideCheckupDoctor = {true}
+                      hideRoomsAdmin = {true}
+                      hideDocsAdmin = {true}
+                      hideClinics = {true}
+                      hideClinicInfoAdmin = {true}
+                      hideAddNewClinic = {true}
+                      hidePatientsDoc = {true}
+                      hideVacation = {true}
+                      hideLogOut = {true}
+                      sakrij = {true}
+                      hideAllQuicksEvent = {true}                      
+                      hideKarton = {true}
+                      hidePregledi = {true}
+                      
+                      />
       <div
         className="page-header"
         style={{
@@ -299,6 +453,33 @@ class RegisterPage extends Component {
                 
         </div>
         </Modal>
+
+        <Modal modalClassName="modal-login" isOpen={this.state.changeFirstPass}>      
+        <div className="modal-header no-border-header text-center">
+            <h3 className="title mx-auto">Promjena lozinke</h3>
+        </div>
+        <div className="modal-body">                       
+                <Form onSubmit={this.changePassword}>                  
+                <FormGroup>
+                <label>Nova lozinka</label>
+                <Input  name="password1"  value = {this.state.password1}  onChange={(event) => this.pass1Validation(event)} type="password"  />
+                <p style={{color:'red'}} > {this.state.password1Validation} </p>
+                </FormGroup>
+                <FormGroup>
+                <label>Potvrda lozinke</label>
+                <Input  name="password11"  value = {this.state.password11} onChange={(event) => this.pass2Validation(event)}  type="password"  />
+                <label color="red" name="password11Validation" > </label>
+                <p style={{color:'red'}} > {this.state.password11Validation} </p>
+                </FormGroup>
+
+                  <p className="text-danger font-weight-bold" >{this.state.formErrorText}</p>                  
+                  <Button block className="btn-round" color="info" >
+                    Promijeni lozinku
+                  </Button>
+                  </Form>
+                
+        </div>
+        </Modal>
         
         <Modal modalClassName="modal-login" isOpen={this.state.loginShow}>      
         <div className="modal-header no-border-header text-center">
@@ -317,23 +498,24 @@ class RegisterPage extends Component {
                 <Form onSubmit={this.sendLogin}>                  
                   <FormGroup>
                     <label className="text-primary font-weight-bold"> Email</label>
-                    <Input className="form-control" name="email" placeholder="email" type="text" value={this.state.email} onChange={event => this.setState({email: event.target.value})} onBlur={this.mailValidation}/>
+                    <Input id = "loginEmail" className="form-control" name="email" placeholder="email" type="text" value={this.state.email} onChange={event => this.setState({email: event.target.value})} onBlur={this.mailValidation}/>
                   <FormText color="danger">{this.state.emailErrorText}</FormText>
                   </FormGroup>                  
                   <FormGroup>
                     <label className="text-primary font-weight-bold">Lozinka</label>
-                    <Input  name="password" className="form-control" placeholder="lozinka" type="password" value={this.state.password} onChange={event => this.setState({password: event.target.value})} />
+                    <Input id = "loginPassword"  name="password" className="form-control" placeholder="lozinka" type="password" value={this.state.password} onChange={event => this.setState({password: event.target.value})} />
                   </FormGroup>               
                   <p className="text-danger font-weight-bold" >{this.state.formErrorText}</p>                  
-                  <Button block className="btn-round" color="info" disabled={this.state.loginDisable}>
+                  <Button id="confirmButton" block className="btn-round" color="info" disabled={this.state.loginDisable}>
                     Prijavi se
                   </Button>
                   </Form>
                 
         </div>
         </Modal>
+        <NotificationContainer/>
     </div>
     )};
 }
 
-export default RegisterPage;
+export default withRouter(RegisterPage);
