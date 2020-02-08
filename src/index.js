@@ -35,6 +35,14 @@ import MedicalWorkerPage from "views/examples/MedicalWorkerPage.js";
 import RegistrationRequest from "views/examples/RegistrationRequest.js";
 import AdministratorPage from "views/examples/AdministratorPage.js";
 import PatientPage from "views/examples/PatientPage.js";
+import ClinicHomePage from "views/examples/ClinicHomePage.js";
+import ActivateAccount from "views/examples/ActivateAccount";
+import ConfirmCheckup from "views/examples/ConfirmCheckup";
+import CodebookPage from "views/examples/CodebookPage.js";
+import ViewAndEditClinic from "views/examples/ViewAndEditClinic";
+import MyCalendar from "./views/examples/Calendar";
+import MapGoogle from "./views/examples/MapGoogle";
+import Checkup from "views/examples/Checkup";
 // others
 
 ReactDOM.render(
@@ -74,8 +82,40 @@ ReactDOM.render(
         render={props => <AdministratorPage {...props} />}
       />
       <Route
-        path="/patient-page"
+        path="/patient-page/:id"
         render={props => <PatientPage {...props} />}
+      />
+      <Route
+        path="/codebook-page"
+        render={props => <CodebookPage {...props} />}
+      />
+      <Route
+        path="/clinic-homepage/:id"
+        render={props => <ClinicHomePage {...props} />}
+      />
+      <Route
+        path="/ActivateAccount/:id"
+        render={props => <ActivateAccount {...props} />}
+      />
+      <Route
+        path="/ConfirmCheckup/:id"
+        render={props => <ConfirmCheckup {...props} />}
+      />
+      <Route
+        path="/Checkup/:id"
+        render={props => <Checkup {...props} />}
+      />
+      <Route
+        path="/viewandeditclinic-page"
+        render={props => <ViewAndEditClinic {...props} />}
+      />
+      <Route
+        path="/calendar"
+        render={props => <MyCalendar {...props} />}
+      />
+      <Route
+        path="/map"
+        render={props => <MapGoogle {...props} />}
       />
       <Redirect to="/register-page" />
     </Switch>
