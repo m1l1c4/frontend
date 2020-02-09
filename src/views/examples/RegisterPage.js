@@ -29,7 +29,7 @@ import "../../../node_modules/react-notifications/lib/notifications.css"
 import "../../../node_modules/react-notifications/lib/Notifications.js"
 // core components
 import ExamplesNavbar from "components/Navbars/ExamplesNavbar.js";
-
+const url = 'https://clinical-center-tim31.herokuapp.com/'
 class RegisterPage extends Component {
   constructor(props)
   {
@@ -154,7 +154,7 @@ class RegisterPage extends Component {
 
           axios({
             method: 'post',
-            url: 'http://localhost:8099/register',
+            url: url + 'register',
             data: data ,
             ContentType: 'application/json'            
           }).then((response) => {
@@ -179,7 +179,7 @@ class RegisterPage extends Component {
 
     axios({
       method: 'get' ,    
-      url: 'http://localhost:8099/getUser' ,           
+      url: url + 'getUser' ,           
       headers: { "Authorization": AuthStr }   
     }).then((response) => {
       if (response.data != null)
@@ -247,7 +247,7 @@ class RegisterPage extends Component {
       let AuthStr = 'Bearer '.concat(token);
       axios({
         method: 'post',
-        url: 'http://localhost:8099/changePassword',
+        url: url + 'changePassword',
         data: text,
         headers: { "Authorization": AuthStr },
       }).then((response) => {
@@ -301,7 +301,7 @@ class RegisterPage extends Component {
     let AuthStr = 'Bearer '.concat(localStorage.getItem('ulogovan'))
       axios({
         method: 'get',
-        url: 'http://localhost:8099/rollingInTheDeep' ,
+        url: url + 'rollingInTheDeep' ,
         headers: { "Authorization": AuthStr }             
       }).then((response)=>{  
         if (response.status !== 404) {
@@ -329,7 +329,7 @@ class RegisterPage extends Component {
       };
       axios({
         method: 'post',
-        url: 'http://localhost:8099/login',
+        url: url + 'login',
         data: data,
         ContentType: 'application/json'
       }).then((response) => {
