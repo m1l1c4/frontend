@@ -98,7 +98,7 @@ let tempGraph2 = {
   ]
 };
  */
- 
+const url = 'https://clinical-center-tim31.herokuapp.com/' ;
 class ViewAndEditClinic extends Component {
   constructor(props)
   {
@@ -206,7 +206,7 @@ class ViewAndEditClinic extends Component {
       };        
       axios({
         method: 'post',
-        url: 'http://localhost:8099/clinic/addRoom',
+        url: url + 'addRoom',
         data: data,
         headers: { "Authorization": AuthStr }  
       }).then((response) => {
@@ -316,7 +316,7 @@ if(ok){
   data.push(ddatum2);
   axios({
     method: 'post',
-    url: 'http://localhost:8099/clinic/getRevenue',
+    url: url + 'clinic/getRevenue',
     data: data,
     headers: { "Authorization": AuthStr }  
   }).then((response) => {
@@ -386,7 +386,7 @@ addType = event => {
  
       axios({
         method: 'post',
-        url: 'http://localhost:8099/checkUpType/addType',
+        url: url + 'checkUpType/addType',
         data: data,
         headers: { "Authorization": AuthStr }  
       }).then((response) => {
@@ -435,7 +435,7 @@ deleteType(name, e){
   let AuthStr = 'Bearer '.concat(token);
   axios({
     method: 'post',
-    url: 'http://localhost:8099/checkUpType/deleteType/' + name,
+    url: url + 'checkUpType/deleteType/' + name,
     headers: { "Authorization": AuthStr }  
   }).then((response) => {
      NotificationManager.success('Tip uspjesno izbrisan!', 'Uspjesno!', 3000);
@@ -456,7 +456,7 @@ deleteType(name, e){
   let AuthStr = 'Bearer '.concat(token);
   axios({
     method: 'post',
-    url: 'http://localhost:8099/clinic/deleteRoom/' + name,
+    url: url + 'clinic/deleteRoom/' + name,
     headers: { "Authorization": AuthStr }  
   }).then((response) => {
     console.log(response);
@@ -495,7 +495,7 @@ roomNumberValidation(e){
  
   axios({
     method: 'get',
-    url: 'http://localhost:8099/clinic/getClinic',
+    url: url + 'clinic/getClinic',
     headers: { "Authorization": AuthStr }  
   }).then((response)=>{
     console.log(response);
@@ -506,7 +506,7 @@ roomNumberValidation(e){
  
   axios({
     method: 'get',
-    url: 'http://localhost:8099/clinic/getRooms',
+    url: url + 'clinic/getRooms',
     headers: { "Authorization": AuthStr }  
   }).then((response) => {
     console.log(response);
@@ -517,7 +517,7 @@ roomNumberValidation(e){
  
   axios({
     method: 'get',
-    url: 'http://localhost:8099/clinic/getReportForMonth',
+    url: url + 'clinic/getReportForMonth',
     headers: { "Authorization": AuthStr }  
   }).then((response) => {
     console.log(response);
@@ -558,7 +558,7 @@ roomNumberValidation(e){
  
   axios({
     method: 'get',
-    url: 'http://localhost:8099/clinic/getReportForWeek',
+    url: url + 'clinic/getReportForWeek',
     headers: { "Authorization": AuthStr }  
   }).then((response) => {
     console.log(response);
@@ -601,7 +601,7 @@ roomNumberValidation(e){
  
   axios({
     method: 'get',
-    url: 'http://localhost:8099/clinic/getAllTypes',
+    url: url + 'clinic/getAllTypes',
     headers: { "Authorization": AuthStr }  
   }).then((response) => {
     console.log(response);
@@ -688,7 +688,7 @@ roomNumberValidation(e){
  
     axios({
       method: 'post',
-      url: 'http://localhost:8099/clinic/updateClinic',
+      url: url + 'clinic/updateClinic',
       data: data,
       headers: { "Authorization": AuthStr }  
     }).then((response) => {
