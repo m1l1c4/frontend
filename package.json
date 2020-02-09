@@ -1,16 +1,16 @@
 {
-  "homepage": "https://Dr4g4n4.github.io/frontend",
-  "name": "frontend",
+  "name": "my-app",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "axios": "^0.19.0",
     "bootstrap": "^4.3.1",
+    "chart.js": "^2.9.3",
     "classnames": "^2.2.6",
     "google-maps-react": "^2.0.2",
     "mdbreact": "^4.23.0",
     "moment": "^2.24.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "nouislider": "^13.1.5",
     "react": "^16.11.0",
     "react-big-calendar": "^0.23.0",
@@ -22,20 +22,20 @@
     "react-datetime-picker": "^2.8.0",
     "react-dom": "^16.11.0",
     "react-notifications": "^1.4.3",
+    "react-select": "^3.0.8",
+    "react-render-html": "^0.6.0",
     "react-router": "^5.0.1",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "3.2.0",
-    "react-select": "^3.0.8",
+    "react-scripts": "^3.3.0",
     "react-star-ratings": "^2.3.0",
+    "react-table": "^7.0.0-rc.15",
     "reactstrap": "^8.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -51,8 +51,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "gh-pages": "^2.1.1"
   }
 }
