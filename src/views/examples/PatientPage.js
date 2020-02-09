@@ -719,11 +719,11 @@ sortByCity(){
   if(this.state.sort2){
     temp.sort(function(a,b){let ime1 = a.city; let ime2 = b.city; return ime2.localeCompare(ime1)})
   }
-else{
+  else{
   temp.sort(function(a,b){let ime1 = a.city; let ime2 = b.city; return ime1.localeCompare(ime2)})
-}
+  }
   this.setState({clinics:temp,sort2: !this.state.sort2})
-}
+  }
 
 
 
