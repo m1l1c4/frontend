@@ -31,7 +31,7 @@ import DemoFooter from 'components/Footers/DemoFooter.js';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 import "../../../node_modules/react-notifications/lib/notifications.css"
 import "../../../node_modules/react-notifications/lib/Notifications.js"
- 
+const url = 'https://clinical-center-tim31.herokuapp.com/'
 class RegistrationRequest extends Component {
     constructor(props) {
         super(props);
@@ -112,7 +112,7 @@ class RegistrationRequest extends Component {
                     let AuthStr = 'Bearer '.concat(token);
                     axios({
                         method: 'post',
-                        url: 'http://localhost:8099/requestVacation/ok',
+                        url: url + 'requestVacation/ok',
                         data: pom,
                         headers: { "Authorization": AuthStr }  
                       }).then((response) => {
@@ -151,7 +151,7 @@ class RegistrationRequest extends Component {
                     let AuthStr = 'Bearer '.concat(token);
                     axios({
                         method: 'post',
-                        url: 'http://localhost:8099/requestVacation/' + expl,
+                        url: url + 'requestVacation/' + expl,
                         data: pom,
                         headers: { "Authorization": AuthStr }  
                       }).then((response) => {
@@ -193,7 +193,7 @@ class RegistrationRequest extends Component {
  
             axios({
                 method: 'post',
-                url: 'http://localhost:8099/sendConfirm',
+                url: url + 'sendConfirm',
                 data: text,                
             }).then((response) => {
                 NotificationManager.success('Pacijent je uspjesno obavijesten!', 'Uspjesno!', 3000);
@@ -217,7 +217,7 @@ class RegistrationRequest extends Component {
  
         axios({
             method: 'post',
-            url: 'http://localhost:8099/sendConfirm' ,
+            url: url + 'sendConfirm' ,
             data: text ,            
         }).then((response) => {
             console.log(response);
@@ -238,7 +238,7 @@ class RegistrationRequest extends Component {
         let AuthStr = 'Bearer '.concat(token);
         axios({
             method: 'get',
-            url: 'http://localhost:8099/getRequestForVacation',
+            url: url  + 'getRequestForVacation',
              headers: { "Authorization": AuthStr } ,          
         }).then((response) => {
             console.log(response);
@@ -249,7 +249,7 @@ class RegistrationRequest extends Component {
  
         axios({
             method: 'get',
-            url: 'http://localhost:8099/patientsRequests',            
+            url: url + 'patientsRequests',            
         }).then((response) => {
             console.log(response);
             this.setState({requests:response.data})
@@ -258,7 +258,7 @@ class RegistrationRequest extends Component {
         });
         axios({
             method: 'get',
-            url: 'http://localhost:8099/requestsForRoom',   
+            url: url + 'requestsForRoom',   
             headers: { "Authorization": AuthStr }           
         }).then((response) => {
             console.log(response);
