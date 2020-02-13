@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://tim31front.herokuapp.com/",
   "engines": {
     "npm": "6.12.0",
     "node": "12.13.0"
